@@ -32,7 +32,7 @@ import org.omegat.util.StaticUtils
 // constants
 def prop = project.getProjectProperties()
 def tmdir = prop.getTMRoot()
-def mldir_str = tmdir + "capps"
+def mldir_str = tmdir + "capps" + container
 def mldir = new File(mldir_str)
 def proj = prop.projectName
 def root = prop.getProjectRoot()
@@ -42,14 +42,18 @@ def container = (proj =~ /^[^_]+(?=_)/)[0]
 timestamp = new Date().format("YYYYMMddHHmm")
 confDir = StaticUtils.getConfigDir()
 
+containers_config = new File(confDir.toString() + File.separator + "containers_config.json")
+
 logFile = new File(confDir.toString() + File.separator + "logs" + File.separator + "container_assets_${container}.log")
 
 // functions
 logEcho = { msg ->
     if (logFile.exists()) {
+		// todo: if it exists and is not empty, do nothing
         logFile.append(msg + "\n", "UTF-8")
         console.println(msg)
     } else {
+		// otherwise, document when the asset was downloaded (just once, at the end of the script)
         logFile.write(msg + "\n", "UTF-8")
         console.println(msg)
     }
@@ -65,11 +69,21 @@ logEcho = { msg ->
 	StaticUtils.getConfigDir()
  */
 
+def jsonSlurper = new JsonSlurper()
+def containers_config_obj = jsonSlurper.parseFile(containers_config)
+
+console.println "${containers_config_obj}"
+return
+
+
+
+
  // todo:
- // "value"check if the container is in container.properties json file
+ // check if the container is in container.properties json file
  //
  // if it is, try to download language _regular_expression_operators
-logEcho("="*40 + "\n" + " "*5 + "Container assets download\n" + "="*40)
+logEcho("="*40 + "\n" + " "*5 + "Container assets management\n" + "="*40)
+
 
 
 // if (new File(mldir_str).exists())
@@ -151,8 +165,8 @@ tm_list_array.each { line ->
 	}
 }
 
-logEcho("="*40 + "\n" + " "*5 + "Container assets download concluded\n" + "="*40)
-
+logEcho("-"*40)
+// todo: add ${container} to msg
 return
 
 // https://www.baeldung.com/groovy-pattern-matching

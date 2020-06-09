@@ -1,0 +1,63 @@
+{
+	"ASIP": {
+		"updated": "2019-12-20",
+		"tags": "/<[^>]+>/",
+		"tm": [
+			"https://capps.capstan.be/TM/ASIP_{lang}_2015.tmx",
+			"https://capps.capstan.be/TM/ASIP_{lang}_2018.tmx"
+		]
+	},
+	"CAAIP": {
+		"updated": "2019-08-10",
+		"tags": "/blabla*/",
+		"glossary": [
+			"https://capps.capstan.be/TM/CAAIP_{lang}.utf8"
+		],
+		"tm": [
+			"https://capps.capstan.be/TM/CAAIP_C2_{lang}_Num.tmx",
+			"https://capps.capstan.be/TM/CAAIP_C2_{lang}_Lit.tmx",
+			"https://capps.capstan.be/TM/CAAIP_C2_{lang}_BQ.tmx"
+		]
+	},
+	"PISA": {
+	    "updated": "2020-06-02",
+	    "tmx": {
+			"sources" : [
+				{
+					"location": "https://capps.capstan.be/TM/",
+			        "file_patterns": [
+			           "PISA_{cycle}_*{tgtLang}*.tmx"
+			        ]
+				},
+				{
+					"location": "https://pisa.ets.org/TM",
+			        "file_patterns": [
+			           "PISA_{cycle}_*{tgtLang}*.tmx"
+			        ],
+			        "include_only": [
+						"omtprj", "2021"
+					],
+			        "exclude": [
+						"disallowed", "testing", "draft"
+					],
+					"destination_mapping": {
+						"(example) part of the tmx filename": "path inside the /tm folder",
+						"Help and Orientation": "enforce",
+					},
+				},
+			],
+			"dependency_mapping": {
+				"cg": [
+					"cog",
+					"cg"
+				],
+				"qq": [
+					"qq"
+				],
+				"cog": [
+					"cog"
+				]
+			}
+	    }
+	}
+}
