@@ -3,6 +3,7 @@
 This repo contains Groovy scripts that can be run in OmegaT to automate or improve certain tasks.
 
 * [Container assets management](#container-assets-management-container_assetsgroovy)
+* [Copy source](#copy-source-copy_sourcegroovy)
 
 
 ## Container assets management [`container_assets.groovy`]
@@ -41,4 +42,4 @@ The script runs automatically when the user opens any project.
 
 Language assets must be valid TMX files (according to the TMX 1.1 specification) or valid TSV glossary files according to OmegaT's format.
 
-## copy_source.groovy
+## Copy source [`copy_source.groovy`]
