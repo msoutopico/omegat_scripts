@@ -2,7 +2,7 @@
 
 This repo contains Groovy scripts that can be run in OmegaT to automate or improve certain tasks.
 
-* [Container assets management(#container-assets-management-container_assetsgroovy)
+* [Container assets management](#container-assets-management-container_assetsgroovy)
 
 
 ## Container assets management [`container_assets.groovy`]
