@@ -24,7 +24,7 @@
 	    "tmx": {
 			"sources" : [
 				{
-					"location": "https://capps.capstan.be/TM/",
+					"location": "https://capps.capstan.be/_Merged/",
 			        "file_patterns": [
 			           "PISA_{cycle}_*{tgtLang}*.tmx"
 			        ]
