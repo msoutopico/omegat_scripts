@@ -2,6 +2,9 @@
 
 This repo contains Groovy scripts that can be run in OmegaT to automate or improve certain tasks.
 
+* [Container assets management(#container-assets-management-container_assetsgroovy)
+
+
 ## Container assets management [`container_assets.groovy`]
 
 This script runs automatically when loading the project and downloads certain language assets (TM, glossary, style parameters, etc.) based on metadata included in the project settings or the project name, or in an external file (`containers_config.json`) included in a correctly customized OmegaT installation.
