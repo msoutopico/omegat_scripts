@@ -139,6 +139,8 @@ def download_asset(remote_asset_name, domain, assets_dir) {
 		FileUtils.copyInputStreamToFile(url_to_remote_asset.toURL().openStream(), dest_file)
 	} catch (IOException e) {
 		// unable to download asset
+		console.println("Unable to download asset: " + e.message)
+		return
 	}
 }
 
@@ -155,7 +157,8 @@ def update_assets(domain, tgtlang, dest, ext) {
 		// FileUtils.copyInputStreamToFile(url_to_hash_list.toURL().openStream(), destination)
 	} catch (IOException e) {
 		// last_modif will stay an empty array
-	    console.println e.printStackTrace("List of hashes not found in server") // @todo: log_echo into the project
+	    // console.println e.printStackTrace("List of hashes not found in server") // @todo: log_echo into the project
+	    console.println("List of hashes not found in server: " + e.message)
 	    return // stop script if list of hashes not available?? or just download everything found?
 	}
 
