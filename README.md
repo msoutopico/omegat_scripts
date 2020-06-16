@@ -4,7 +4,8 @@ This repo contains Groovy scripts that can be run in OmegaT to automate or impro
 
 * [Container assets management](#container-assets-management-container_assetsgroovy)
 * [Copy source](#copy-source-copy_sourcegroovy)
-
+* [Customization script](#blabla)
+* [Transliteration]
 
 ## Container assets management [`container_assets.groovy`]
 
@@ -29,6 +30,10 @@ The following requirements must be met so that the script can work.
 
 #### Local pre-conditions
 1. The OmegaT installation must have been customized and the customization must be up to date.
+2. The URLs to the remote directories containing language assets to be downloaded must be included in a properties file (`containers_config.json`) saved in the configuration folder.
+3. The name of the OmegaT project must observe a number of requirements:
+	* It starts with the name of the container (case-sensitive)
+	* In 2021: it includes the three-letter (cApStAn or ETS) target-language code (e.g. `glg-ESP` for Galician)
 
 ### Execution
 

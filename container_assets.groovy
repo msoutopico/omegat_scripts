@@ -64,6 +64,7 @@ import org.omegat.util.StringUtil
 import static javax.swing.JOptionPane.*
 import static org.omegat.util.Platform.*
 
+// unused
 utils = (StringUtil.getMethods().toString().findAll("makeValidXML")) ? StringUtil : StaticUtils
 
 String.metaClass.confirm = { ->
@@ -75,18 +76,20 @@ String.metaClass.alert = { ->
 }
 
 // first check: is a project open?
+title = "Language assets management"
 if ( project.projectProperties ) {
 	project_alert = false
 } else {
 	project_alert = true
 	message = "No project is open, a project needs to be open to run this script."
 }
-title = "Language assets management"
 if (project_alert) {
 	console.println(message)
 	message.alert()
 	return
+	// stop here if no project is open
 } else {
+	// the script starts here if a project is open
 	console.println("="*40 + "\n" + " "*5 + "Container assets management\n" + "="*40)
 }
 
@@ -221,7 +224,7 @@ def update_assets(domain, tgtlang, dest, ext) {
 
 // glossaries
 // function parameters: domain, container, tgtlang, dest, ext
-def tb_domain = "https://capps.capstan.be/Glossaries/"
+def tb_domain = "https://capps.capstan.be/test_assets/"
 def tgtlang = tgtlang_iso
 // def list_url = 			tb_domain + "list_contents.php"
 hash_filename = "hash_list.txt"
