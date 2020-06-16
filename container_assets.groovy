@@ -1,7 +1,7 @@
 /* :name = Container Assets Manager :description =Download langauge assets for a specific container and language pair
  *
- *  @version: 0.1.0
- *  @author: Manuel Souto Pico, with awesome help from Kos Ivantsov
+ *  @version: 0.1.3
+ *  @author: Manuel Souto Pico, with awesome help from Kos Ivantsov and Briac Pilpré
  *  @date: 2020.05.29
  *  @properties: https://cat.capstan.be/OmegaT/project-assets.json
  */
@@ -88,10 +88,10 @@ if (project_alert) {
 	message.alert()
 	return
 	// stop here if no project is open
-} else {
-	// the script starts here if a project is open
-	console.println("="*40 + "\n" + " "*5 + "Container assets management\n" + "="*40)
 }
+
+// the script starts here if a project is open
+console.println("="*40 + "\n" + " "*5 + "Container assets management\n" + "="*40)
 
 // constants
 digest = MessageDigest.getInstance("MD5") // not using def gives the variable global scope
@@ -104,19 +104,21 @@ tgtlang_iso = (proj_name =~ /(?<=_)[a-z]{3}-[A-Z]{3}(?=_)/)[0]
 // def omegat_dir = prop.getProjectInternal()
 def glossary_dir = prop.getGlossaryRoot()
 def tmdir_fs = prop.getTMRoot() // fs = forward slash
+def tmdir = new File(tmdir_fs)
 def reftm_dir_str = tmdir_fs + "ref"
 def reftm_dir = new File(reftm_dir_str) // the File object includes backslashes on Windows
-def tmdir = new File(tmdir_fs)
+
 
 timestamp = new Date().format("YYYYMMddHHmm")
-// config_dir = StaticUtils.getConfigDir()
+config_dir = StaticUtils.getConfigDir()
+config_file = new File(config_dir + "containers_config.properties")
 
-def tgt_code = 			project.projectProperties.targetLanguage
-def src_code = 			project.projectProperties.sourceLanguage
-def tgt_lang_subtag = 	project.projectProperties.targetLanguage.languageCode
-def src_lang_subtag = 	project.projectProperties.sourceLanguage.languageCode
-def tgt_region_subtag = project.projectProperties.targetLanguage.countryCode
-def src_region_subtag = project.projectProperties.sourceLanguage.countryCode
+// def tgt_code = 			project.projectProperties.targetLanguage
+// def src_code = 			project.projectProperties.sourceLanguage
+// def tgt_lang_subtag = 	project.projectProperties.targetLanguage.languageCode
+// def src_lang_subtag = 	project.projectProperties.sourceLanguage.languageCode
+// def tgt_region_subtag = project.projectProperties.targetLanguage.countryCode
+// def src_region_subtag = project.projectProperties.sourceLanguage.countryCode
 
 // functions
 log_echo = { msg ->
@@ -131,7 +133,6 @@ log_echo = { msg ->
     }
 }
 def download_asset(remote_asset_name, domain, assets_dir) {
-
 	try {
 		def url_to_remote_asset = domain + remote_asset_name
 		url_to_remote_asset.toURL().openStream()
@@ -145,10 +146,10 @@ def download_asset(remote_asset_name, domain, assets_dir) {
 }
 
 def update_assets(domain, tgtlang, dest, ext) {
-
 	// get remote list of hashes for glossaries
 	try {
 		def url_to_hash_list = domain + hash_filename
+		console.println(url_to_hash_list)
 		// @Kos: check to make sure there's internet connection
 		url_to_hash_list.toURL().openStream()
 		hash_list = url_to_hash_list.toURL().readLines()
@@ -157,18 +158,27 @@ def update_assets(domain, tgtlang, dest, ext) {
 		// FileUtils.copyInputStreamToFile(url_to_hash_list.toURL().openStream(), destination)
 	} catch (IOException e) {
 		// last_modif will stay an empty array
-	    // console.println e.printStackTrace("List of hashes not found in server") // @todo: log_echo into the project
-	    console.println("List of hashes not found in server: " + e.message)
+		console.println("List of hashes not found in server: " + e.message)
 	    return // stop script if list of hashes not available?? or just download everything found?
+	}
+
+	if (!hash_list) {
+		console.println("No hash list found, unable to continue.")
+		return
 	}
 
 	// put remote list of hashes in array (filename -> hash)
 	//
 	// Pattern re = ~/${container}_(?:.*?)_Glossary_${tgt_code}/
 	// def match = re.matcher(str).asBoolean()
-	def filtered_by_tgtlang = hash_list.findAll { it.contains("${tgtlang}") }
-	def filtered_by_container = filtered_by_tgtlang.findAll { it.contains("${container}")}
-	def remote_file_hash_map = filtered_by_container.collectEntries {
+	// filtered by target language
+	hash_list = hash_list.findAll { it.contains("${tgtlang}") }
+	// filtered by container
+	hash_list = hash_list.findAll { it.contains("${container}")}
+	// filtered by extension / file type
+	hash_list = hash_list.findAll { it.contains("${ext}")}
+	// moveing the list to a map
+	def remote_file_hash_map = hash_list.collectEntries {
 		def hash = it.split(':')[0]
 		def file = it.split(':')[1]
 		[(file): hash]
@@ -201,6 +211,7 @@ def update_assets(domain, tgtlang, dest, ext) {
 		remote_asset_hash = it.value
 
 		def message
+		// if the remote asset is found in the assets folder
 		def downloaded = local_file_hash_map.containsKey(remote_asset_name)
 		if (downloaded) {
 			def local_asset_hash = local_file_hash_map.find{ it.key == remote_asset_name }?.value
@@ -227,11 +238,17 @@ def update_assets(domain, tgtlang, dest, ext) {
 
 // glossaries
 // function parameters: domain, container, tgtlang, dest, ext
-def tb_domain = "https://capps.capstan.be/test_assets/"
+def tb_domain = "https://capps.capstan.be/test_assets/" // @todo: get from properties file
 def tgtlang = tgtlang_iso
 // def list_url = 			tb_domain + "list_contents.php"
 hash_filename = "hash_list.txt"
 def destination = glossary_dir
 def extension = "utf8"
-
 update_assets(tb_domain, tgtlang, destination, extension)
+
+reftm_dir.mkdirs()
+tm_domain = tb_domain
+destination = reftm_dir_str
+extension = "tmx"
+update_assets(tm_domain, tgtlang, destination, extension)
+return
