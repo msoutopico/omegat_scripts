@@ -45,4 +45,31 @@ The script runs automatically when the user opens any project.
 3. If the container is recognized, it tries to download the language assets available and puts them in the right place: TMX files go to `/tm/ref`, glossaries go to `/glossary`, etc.
     - To avoid re-downloading every time files that were already downlaoded, the `hash_list.txt` file is used to determine whether each available asset is new (now downloaded before) or has been updated.
 
+## TODO
+
+### Security
+
+Add some HTTP Basic Authentication (a `.htaccess` file) on the server and include the login/password in the config file.
+
+### Config file
+
+Java properties should be easy to edit for anyone while not too flat to store container's properties.
+
+```
+# Test
+test.domain=http://...
+
+# Container
+container.property1=value
+container.property2=another value
+```
+
+### ETag
+
+Using ETag header makes the hash list unnecessary, so it gets simpler for the server sysadmin.
+
+### Recursivity
+
+In case the server sysadmin organizes assets in folders and subfolders by container and language code, the script should parse the remote directory recursively.
+
 ## Copy source [`copy_source.groovy`]
