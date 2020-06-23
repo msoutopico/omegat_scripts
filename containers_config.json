@@ -3,20 +3,20 @@
 		"updated": "2019-12-20",
 		"tags": "/<[^>]+>/",
 		"tm": [
-			"https://capps.capstan.be/TM/ASIP_{lang}_2015.tmx",
-			"https://capps.capstan.be/TM/ASIP_{lang}_2018.tmx"
+			"https://capps.capstan.be/_Merged/ASIP_{lang}_2015.tmx",
+			"https://capps.capstan.be/_Merged/ASIP_{lang}_2018.tmx"
 		]
 	},
 	"CAAIP": {
 		"updated": "2019-08-10",
 		"tags": "/blabla*/",
 		"glossary": [
-			"https://capps.capstan.be/TM/CAAIP_{lang}.utf8"
+			"https://capps.capstan.be/_Merged/CAAIP_{lang}.utf8"
 		],
 		"tm": [
-			"https://capps.capstan.be/TM/CAAIP_C2_{lang}_Num.tmx",
-			"https://capps.capstan.be/TM/CAAIP_C2_{lang}_Lit.tmx",
-			"https://capps.capstan.be/TM/CAAIP_C2_{lang}_BQ.tmx"
+			"https://capps.capstan.be/_Merged/CAAIP_C2_{lang}_Num.tmx",
+			"https://capps.capstan.be/_Merged/CAAIP_C2_{lang}_Lit.tmx",
+			"https://capps.capstan.be/_Merged/CAAIP_C2_{lang}_BQ.tmx"
 		]
 	},
 	"PISA": {
@@ -24,7 +24,7 @@
 	    "tmx": {
 			"sources" : [
 				{
-					"location": "https://capps.capstan.be/_Merged/",
+					"@location": "https://capps.capstan.be/_Merged/",
 			        "file_patterns": [
 			           "PISA_{cycle}_*{tgtLang}*.tmx"
 			        ]
@@ -42,9 +42,9 @@
 					],
 					"destination_mapping": {
 						"(example) part of the tmx filename": "path inside the /tm folder",
-						"Help and Orientation": "enforce",
-					},
-				},
+						"Help and Orientation": "enforce"
+					}
+				}
 			],
 			"dependency_mapping": {
 				"cg": [

@@ -1,7 +1,7 @@
 /* :name = Container Assets Manager :description =Download langauge assets for a specific container and language pair
  *
- *  @version: 0.1.3
- *  @author: Manuel Souto Pico, with awesome help from Kos Ivantsov and Briac Pilpré
+ *  @version: 0.2.0
+ *  @author: Manuel Souto Pico, thanks to Kos Ivantsov and Briac Pilpré for advice and review
  *  @date: 2020.05.29
  *  @properties: https://cat.capstan.be/OmegaT/project-assets.json
  */
@@ -23,6 +23,18 @@
  *  e.g. C:\Users\manuel\AppData\Roaming\OmegaT\scripts\project_changed\container_customizer.groovy
  *
  */
+
+// first check: is the project being opened?
+import org.omegat.core.events.IProjectEventListener.PROJECT_CHANGE_TYPE
+title = "Language assets management (manual)"
+console.println("eventType: " + eventType)
+// 	// the different stages of the project changes are CLOSE, COMPILE, CREATE, LOAD, SAVE and MODIFIED
+if (eventType != PROJECT_CHANGE_TYPE.LOAD) {
+	console.println("This script only runs when the project is loading.")
+	return
+}
+console.println("eventType: " + eventType)
+// else eventType is LOAD: continue...
 
 // modules
 import groovy.util.*
@@ -75,20 +87,6 @@ String.metaClass.alert = { ->
     showMessageDialog null, delegate, title, INFORMATION_MESSAGE
 }
 
-// first check: is a project open?
-title = "Language assets management"
-if ( project.projectProperties ) {
-	project_alert = false
-} else {
-	project_alert = true
-	message = "No project is open, a project needs to be open to run this script."
-}
-if (project_alert) {
-	console.println(message)
-	message.alert()
-	return
-	// stop here if no project is open
-}
 
 // the script starts here if a project is open
 console.println("="*40 + "\n" + " "*5 + "Container assets management\n" + "="*40)
@@ -191,6 +189,7 @@ def update_assets(domain, tgtlang, dest, ext) {
 	def ext_re = ~/${ext}/ // @todo: match container and langauge
 
 	assets_dir.traverse(type: FILES, maxDepth: 0) {
+		// @todo: should this be done asynchronously perhaps?
 		// create object of Path
 		Path path = Paths.get(it.path)
 		// call getFileName() and get FileName as a string
@@ -234,6 +233,7 @@ def update_assets(domain, tgtlang, dest, ext) {
 
 		console.println(message)
 	}
+	console.println("Done!\n")
 }
 
 // glossaries
@@ -250,5 +250,14 @@ reftm_dir.mkdirs()
 tm_domain = tb_domain
 destination = reftm_dir_str
 extension = "tmx"
-update_assets(tm_domain, tgtlang, destination, extension)
+// update_assets(tm_domain, tgtlang, destination, extension)
+//
+
+console.println("eventType: " + eventType)
+console.println("Collecting garbage...")
+System.gc()
+console.println("All garbage collected. Ready for next run.")
+
+
+
 return
