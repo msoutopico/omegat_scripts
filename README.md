@@ -47,9 +47,14 @@ The script runs automatically when the user opens any project.
 
 ## TODO
 
+
+### Log
+
+Write output both to the console and the log file, for debugging purposes.
+
 ### Security
 
-Add some HTTP Basic Authentication (a `.htaccess` file) on the server and include the login/password in the config file.
+Add some HTTP basic authentication (a `.htaccess` file) on the server and include the login/password in the config file.
 
 ### Config file
 
@@ -75,5 +80,9 @@ In case the server sysadmin organizes assets in folders and subfolders by contai
 ### Delete old assets?
 
 TBC: Add a function to check which local assets are not found anymore in any repo.
+
+### Watch assets and update hashes upon modifications
+
+* be updated every time new language asset files are added or updated in that directory (in a Linux server, there is a Linux utility called [incron](http://manpages.ubuntu.com/manpages/focal/en/man5/incrontab.5.html) that can be used similar to normal cron, but rather than events being time based, it works off of inotify and is fired from file events (e.g. `/var/www/path/to/watched/folder IN_CLOSE_WRITE $(which php) -f hash_list.php`).
 
 ## Copy source [`copy_source.groovy`]

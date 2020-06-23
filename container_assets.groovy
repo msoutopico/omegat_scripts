@@ -1,6 +1,6 @@
 /* :name = Container Assets Manager :description =Download langauge assets for a specific container and language pair
  *
- *  @version: 0.2.0
+ *  @version: 0.2.1
  *  @author: Manuel Souto Pico, thanks to Kos Ivantsov and Briac Pilpré for advice and review
  *  @date: 2020.05.29
  *  @properties: https://cat.capstan.be/OmegaT/project-assets.json
@@ -27,14 +27,28 @@
 // first check: is the project being opened?
 import org.omegat.core.events.IProjectEventListener.PROJECT_CHANGE_TYPE
 title = "Language assets management (manual)"
-console.println("eventType: " + eventType)
-// 	// the different stages of the project changes are CLOSE, COMPILE, CREATE, LOAD, SAVE and MODIFIED
-if (eventType != PROJECT_CHANGE_TYPE.LOAD) {
-	console.println("This script only runs when the project is loading.")
+// if (eventType != null && eventType != '') {
+// 	console.println("eventType is " + eventType)
+// } else {
+// 	console.println("no eventType found")
+// }
+// console.println("eventType: " + eventType)
+// // 	// the different stages of the project changes are CLOSE, COMPILE, CREATE, LOAD, SAVE and MODIFIED
+// if (eventType != PROJECT_CHANGE_TYPE.LOAD) {
+// 	console.println("This script only runs when the project is loading.")
+// 	return
+// }
+// console.println("eventType: " + eventType)
+// else eventType is LOAD: continue...
+
+// manual:
+// first check: is a project open?
+if ( !project.projectProperties ) {
+	noprj_prompt = "No project is open, a project needs to be open to run this script."
+	console.println(noprj_prompt)
+	noprj_prompt.alert()
 	return
 }
-console.println("eventType: " + eventType)
-// else eventType is LOAD: continue...
 
 // modules
 import groovy.util.*
@@ -99,12 +113,12 @@ proj_name = prop.projectName
 container = (proj_name =~ /^[^_]+(?=_)/)[0]
 tgtlang_iso = (proj_name =~ /(?<=_)[a-z]{3}-[A-Z]{3}(?=_)/)[0]
 // def root = prop.getProjectRoot()
-// def omegat_dir = prop.getProjectInternal()
-def glossary_dir = prop.getGlossaryRoot()
-def tmdir_fs = prop.getTMRoot() // fs = forward slash
-def tmdir = new File(tmdir_fs)
-def reftm_dir_str = tmdir_fs + "ref"
-def reftm_dir = new File(reftm_dir_str) // the File object includes backslashes on Windows
+omegat_dir = prop.getProjectInternal()
+glossary_dir = prop.getGlossaryRoot()
+tmdir_fs = prop.getTMRoot() // fs = forward slash
+tmdir = new File(tmdir_fs)
+reftm_dir_str = tmdir_fs + "ref"
+reftm_dir = new File(reftm_dir_str) // the File object includes backslashes on Windows
 
 
 timestamp = new Date().format("YYYYMMddHHmm")
@@ -131,22 +145,24 @@ log_echo = { msg ->
     }
 }
 
-
-username = "omegat"
-password = "0m3g4t!sF055"
-HttpURLConnection connection = (HttpURLConnection) url.openConnection()
-String auth = username + ":" + password
-byte[] encodedAuth = Base64.encodeBase64(auth.getBytes(StandardCharsets.UTF_8))
-String authHeaderValue = "Basic " + new String(encodedAuth)
-connection.setRequestProperty("Authorization", authHeaderValue)
-int responseCode = connection.getResponseCode()
+// https://www.baeldung.com/groovy-file-read
+String read_file_string(String path_to_file) {
+    File file = new File(path_to_file)
+    String file_content = file.text
+    return file_content
+}
 
 def download_asset(remote_asset_name, domain, assets_dir) {
 	try {
 		def url_to_remote_asset = domain + remote_asset_name
-		url_to_remote_asset.toURL().openStream()
 		def dest_file = new File(assets_dir.toString() + File.separator + remote_asset_name)
-		FileUtils.copyInputStreamToFile(url_to_remote_asset.toURL().openStream(), dest_file)
+		dest_file.withOutputStream { output_stream  ->
+			def url = new URL(url_to_remote_asset).openConnection()
+			def remote_auth = "Basic " + "${username}:${password}".bytes.encodeBase64()
+			url.setRequestProperty("Authorization", remote_auth)
+			output_stream << url.inputStream
+			// FileUtils.copyInputStreamToFile(url_to_remote_asset.toURL().openStream(), dest_file)
+		}
 	} catch (IOException e) {
 		// unable to download asset
 		console.println("Unable to download asset: " + e.message)
@@ -155,21 +171,43 @@ def download_asset(remote_asset_name, domain, assets_dir) {
 }
 
 def update_assets(domain, tgtlang, dest, ext) {
-	// get remote list of hashes for glossaries
+
+	// get credentials
+	path_to_creds = config_dir + "assets" + File.separator + "creds.txt"
+	creds = read_file_string(path_to_creds)
+	username = creds.split(':')[0]
+	password = creds.split(':')[1]
+
 	try {
-		def url_to_hash_list = domain + hash_filename
-		console.println(url_to_hash_list)
-		// @Kos: check to make sure there's internet connection
-		url_to_hash_list.toURL().openStream()
-		hash_list = url_to_hash_list.toURL().readLines()
-		// to download the file
-		// def destination = new File(omegat_dir.toString() + File.separator + "asset_hashlist.txt")
-		// FileUtils.copyInputStreamToFile(url_to_hash_list.toURL().openStream(), destination)
-	} catch (IOException e) {
+		url_to_hash_list = domain + hash_filename
+		def local_path = new File(config_dir.toString() + File.separator + "asset_hashlist.txt")
+		def url = new URL(url_to_hash_list).openConnection()
+		def remote_auth = "Basic " + "${username}:${password}".bytes.encodeBase64()
+		url.setRequestProperty("Authorization", remote_auth)
+		hash_list = url.inputStream.readLines()
+	}  catch (IOException e) {
 		// last_modif will stay an empty array
-		console.println("List of hashes not found in server: " + e.message)
+		console.println("Unable to downlaod hash list: " + e.message)
 	    return // stop script if list of hashes not available?? or just download everything found?
 	}
+
+	// return
+	//
+	// // get remote list of hashes for glossaries
+	// try {
+	// 	def url_to_hash_list = domain + hash_filename
+	// 	console.println(url_to_hash_list)
+	// 	// @Kos: check to make sure there's internet connection
+	// 	url_to_hash_list.toURL().openStream()
+	// 	hash_list = url_to_hash_list.toURL().readLines()
+	// 	// to download the file
+	// 	// def destination = new File(omegat_dir.toString() + File.separator + "asset_hashlist.txt")
+	// 	// FileUtils.copyInputStreamToFile(url_to_hash_list.toURL().openStream(), destination)
+	// } catch (IOException e) {
+	// 	// last_modif will stay an empty array
+	// 	console.println("List of hashes not found in server: " + e.message)
+	//     return // stop script if list of hashes not available?? or just download everything found?
+	// }
 
 	if (!hash_list) {
 		console.println("No hash list found, unable to continue.")
@@ -229,7 +267,7 @@ def update_assets(domain, tgtlang, dest, ext) {
 				if (local_asset_hash == remote_asset_hash) {
 					message = "Remote asset ${remote_asset_name} hasn't changed, the local copy is up to date."
 				} else {
-					message = "Asset ${remote_asset_name} has been updated, a new download is needed."
+					message = "Remote asset ${remote_asset_name} has been updated, a new download is needed."
 					// download
 					download_asset(remote_asset_name, domain, assets_dir)
 				}
@@ -237,7 +275,7 @@ def update_assets(domain, tgtlang, dest, ext) {
 		} else {
 			// download
 			// check if it exists locally, if it does, then msg:
-			message = "Remote asset ${remote_asset_name} is new or had not been downloaded, downloaded now."
+			message = "Remote asset ${remote_asset_name} is new or had not been downloaded, will be downloaded now."
 			// download
 			download_asset(remote_asset_name, domain, assets_dir)
 		}
@@ -249,12 +287,12 @@ def update_assets(domain, tgtlang, dest, ext) {
 
 // glossaries
 // function parameters: domain, container, tgtlang, dest, ext
-def tb_domain = "https://capps.capstan.be/test_assets/" // @todo: get from properties file
-def tgtlang = tgtlang_iso
+tb_domain = "https://capps.capstan.be/test_assets/" // @todo: get from properties file
+tgtlang = tgtlang_iso
 // def list_url = 			tb_domain + "list_contents.php"
 hash_filename = "hash_list.txt"
-def destination = glossary_dir
-def extension = "utf8"
+destination = glossary_dir
+extension = "utf8"
 update_assets(tb_domain, tgtlang, destination, extension)
 
 reftm_dir.mkdirs()
@@ -264,11 +302,8 @@ extension = "tmx"
 // update_assets(tm_domain, tgtlang, destination, extension)
 //
 
-console.println("eventType: " + eventType)
-console.println("Collecting garbage...")
+// console.println("eventType: " + eventType)
+// console.println("Collecting garbage...")
 System.gc()
-console.println("All garbage collected. Ready for next run.")
-
-
-
+// console.println("All garbage collected. Ready for next run.")
 return
