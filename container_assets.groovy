@@ -130,6 +130,17 @@ log_echo = { msg ->
         console.println(msg)
     }
 }
+
+
+username = "omegat"
+password = "0m3g4t!sF055"
+HttpURLConnection connection = (HttpURLConnection) url.openConnection()
+String auth = username + ":" + password
+byte[] encodedAuth = Base64.encodeBase64(auth.getBytes(StandardCharsets.UTF_8))
+String authHeaderValue = "Basic " + new String(encodedAuth)
+connection.setRequestProperty("Authorization", authHeaderValue)
+int responseCode = connection.getResponseCode()
+
 def download_asset(remote_asset_name, domain, assets_dir) {
 	try {
 		def url_to_remote_asset = domain + remote_asset_name
