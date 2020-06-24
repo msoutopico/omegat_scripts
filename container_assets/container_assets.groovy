@@ -287,7 +287,7 @@ def update_assets(domain, tgtlang, dest, ext) {
 
 // glossaries
 // function parameters: domain, container, tgtlang, dest, ext
-tb_domain = "https://capps.capstan.be/test_assets/" // @todo: get from properties file
+tb_domain = "https://capps.capstan.be/Glossaries/" // @todo: get from properties file
 tgtlang = tgtlang_iso
 // def list_url = 			tb_domain + "list_contents.php"
 hash_filename = "hash_list.txt"
@@ -296,7 +296,8 @@ extension = "utf8"
 update_assets(tb_domain, tgtlang, destination, extension)
 
 reftm_dir.mkdirs()
-tm_domain = tb_domain
+// tm_domain = tb_domain
+tm_domain = "https://capps.capstan.be/TM/"
 destination = reftm_dir_str
 extension = "tmx"
 // update_assets(tm_domain, tgtlang, destination, extension)
