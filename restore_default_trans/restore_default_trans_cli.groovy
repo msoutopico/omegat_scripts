@@ -2,7 +2,7 @@
  *
  * @author      Manuel Souto Pico
  * @date        2020-08-17
- * @version     0.0.2
+ * @version     0.0.3
  */
 
 import org.omegat.core.events.IProjectEventListener.PROJECT_CHANGE_TYPE;
@@ -62,26 +62,17 @@ def all_sources_set = all_sources.toSet()
 
 // finds the entries that should not be alternative
 all_sources_set.each { src_txt ->
-	// see frequency of occurrence (unique or repetition?)
-	def freq_src = Collections.frequency(all_sources, src_txt)
 
-	if (freq_src > 1) {
-	// for repetitions
-		//console.println("Segment '" + src_txt + "' is repeated ${freq_src} times")
-		def alt_trans_set = segm_pairs[src_txt].toSet()
-		def max_rep = 0
-		// get the most frequent translation (to be made the default)
-		alt_trans_set.each { it ->
-			def freq_tgt = Collections.frequency(segm_pairs[src_txt], it)
-			//console.println("Translation '${it}' has been used ${freq_tgt} times")
-			if (freq_tgt > max_rep) {
-				max_rep = freq_tgt
-				segm_pairs_to_default[src_txt] = it
-			}
+	def alt_trans_set = segm_pairs[src_txt].toSet()
+	def max_rep = 0
+	// get the most frequent translation (to be made the default)
+	alt_trans_set.each { it ->
+		def freq_tgt = Collections.frequency(segm_pairs[src_txt], it)
+		//console.println("Translation '${it}' has been used ${freq_tgt} times")
+		if (freq_tgt > max_rep) {
+			max_rep = freq_tgt
+			segm_pairs_to_default[src_txt] = it
 		}
-	} else {
-	// unique (should always be default)
-		segm_pairs_to_default[src_txt] = segm_pairs[src_txt][0]
 	}
 }
 

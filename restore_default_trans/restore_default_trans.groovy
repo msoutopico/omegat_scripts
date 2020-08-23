@@ -2,7 +2,7 @@
  *
  * @author      Manuel Souto Pico, Briac Pilpré
  * @date        2020-08-17
- * @version     0.0.2
+ * @version     0.0.3
   */
 
 // import org.omegat.core.events.IProjectEventListener.PROJECT_CHANGE_TYPE;
@@ -98,7 +98,7 @@ def gui() {
 	def nodes_to_default_counter = 0
 	segm_pairs_to_default.each { src, tgt -> // "src, tgt" are "key, value"
 
-        // get all prop nodes that have tuv parents stored in segm_pairs_to_default
+		// get all prop nodes that have tuv parents stored in segm_pairs_to_default
 		def nodes_to_remove = project_tmx.body.tu.prop.findAll {
 			it.parent().tuv[0].seg.find { s -> s.text() == src } &&
 			it.parent().tuv[1].seg.find { s -> s.text() == tgt }
