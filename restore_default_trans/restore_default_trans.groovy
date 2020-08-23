@@ -61,54 +61,49 @@ def gui() {
 	def segm_pairs = [:]
 	def segm_pairs_to_default = [:]
 
+	// get all source texts and create a map where each source
+	// text is a key and the list of all its translations is the value
 	project_tmx.body.tu.findAll { node ->
 		def source_text = node.tuv[0].seg.text()
 		def target_text = node.tuv[1].seg.text()
 
 		// add source text to list of all source texts
 		all_sources.add(source_text)
+
 		// create one to many mapping if it doesn't exist
 		if (!segm_pairs[source_text]) ( segm_pairs[source_text] = [] )
 		// add translation to the list that has the source text as key
 		segm_pairs[source_text].add(target_text)
-	};
+	}
 
 	// remove repetitions
 	def all_sources_set = all_sources.toSet()
 
 	// finds the entries that should not be alternative
 	all_sources_set.each { src_txt ->
-        // see frequency of occurrence (unique or repetition?)
-		def freq_src = Collections.frequency(all_sources, src_txt)
 
-		if (freq_src > 1) {
-		// for repetitions
-			//console.println("Segment '" + src_txt + "' is repeated ${freq_src} times")
-			def alt_trans_set = segm_pairs[src_txt].toSet()
-			def max_rep = 0
-			// get the most frequent translation (to be made the default)
-			alt_trans_set.each { it ->
-				def freq_tgt = Collections.frequency(segm_pairs[src_txt], it)
-				//console.println("Translation '${it}' has been used ${freq_tgt} times")
-				if (freq_tgt > max_rep) {
-					max_rep = freq_tgt
-					segm_pairs_to_default[src_txt] = it
-				}
+		def alt_trans_set = segm_pairs[src_txt].toSet()
+		def max_rep = 0
+		// get the most frequent translation (to be made the default)
+		alt_trans_set.each { it ->
+			def freq_tgt = Collections.frequency(segm_pairs[src_txt], it)
+			//console.println("Translation '${it}' has been used ${freq_tgt} times")
+			if (freq_tgt > max_rep) {
+				max_rep = freq_tgt
+				segm_pairs_to_default[src_txt] = it
 			}
-		} else {
-		// unique (should always be default)
-			segm_pairs_to_default[src_txt] = segm_pairs[src_txt][0]
 		}
 	}
 
 	def nodes_to_default_counter = 0
 	segm_pairs_to_default.each { src, tgt -> // "src, tgt" are "key, value"
 
-        // find all prop nodes that have tuv parents stored in segm_pairs_to_default
+        // get all prop nodes that have tuv parents stored in segm_pairs_to_default
 		def nodes_to_remove = project_tmx.body.tu.prop.findAll {
-			it.parent().tuv[0].seg.find { s -> s.text() == src } && it.parent().tuv[1].seg.find { s -> s.text() == tgt }
+			it.parent().tuv[0].seg.find { s -> s.text() == src } &&
+			it.parent().tuv[1].seg.find { s -> s.text() == tgt }
 		}
-		//console.println(nodes_to_remove)
+
 		nodes_to_default_counter += nodes_to_remove.size()
 		nodes_to_remove.each { it ->
 			def parent = it.parent()

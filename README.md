@@ -1,6 +1,6 @@
 # OmegaT scripts
 
-This repo contains Groovy scripts that can be run in OmegaT to automate or improve certain tasks.
+This repository contains Groovy scripts that can be run in OmegaT to automate or improve certain tasks.
 
 * [Container assets management](https://github.com/msoutopico/omegat_scripts/tree/master/container_assets)
 * [Copy source](#copy-source-copy_sourcegroovy)
