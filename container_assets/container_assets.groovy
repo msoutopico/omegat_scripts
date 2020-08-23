@@ -1,7 +1,7 @@
 /* :name = Container Assets Manager :description =Download langauge assets for a specific container and language pair
  *
  *  @version: 0.2.1
- *  @author: Manuel Souto Pico, thanks to Kos Ivantsov and Briac Pilpré for advice and review
+ *  @author: Manuel Souto Pico, thanks to Kos Ivantsov and Briac Pilpré for advice and reviews
  *  @date: 2020.05.29
  *  @properties: https://cat.capstan.be/OmegaT/project-assets.json
  */
