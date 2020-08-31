@@ -122,6 +122,6 @@ def gui() {
 	}
 
 	// Phew, all is good. Reopen the project.
-	JOptionPane.showMessageDialog(null, "Context properties removed from ${nodes_to_default_counter} entries.", title, JOptionPane.INFORMATION_MESSAGE);
+	JOptionPane.showMessageDialog(null, "Context properties removed from ${nodes_to_default_counter} entries. \nPlease wait until the project is loaded again.", title, JOptionPane.INFORMATION_MESSAGE);
 	ProjectUICommands.projectOpen(projectRoot, true);
 }
