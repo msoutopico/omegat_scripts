@@ -1,4 +1,4 @@
-/* :name = TA - Translatability Assessment :description =
+/* :name = TA - Translatability Assessment :description =Runs VF4TA on the project and adds TA notes in the translation field.
  *
  *  @version: 1.2.0
  *  @author: Manuel Souto Pico
@@ -9,6 +9,15 @@
 // user options
 include_suggestions = true
 // save_as_tmx2source = true
+
+/* 
+ * OPTIONS: 	The parametter `include_suggestions` above determines whether suggestions are included also (as 
+ * 			well as comments). It is enabled by default but can be disabled by the user: 
+ * 			for that, simply replace "true" with "false".
+ * 			
+ * QUESTIONS:	manuel.souto@capstan.be
+ * 
+ */
 
 
 
@@ -228,32 +237,6 @@ def filter_ruleset_list(list) {
 }
 
 
-def build_ruleset_csv(ruleset_list) {
-	def ruleset = []
-	ruleset_list.each { remote_ruleset_name ->
-
-		def url_to_remote_ruleset = domain + "Rules/" + remote_ruleset_name
-		remote_ruleset_content = get_file_content(url_to_remote_ruleset)
-
-		def headers = remote_ruleset_content.remove(0).tokenize('\t')
-		// console.println(remote_ruleset_content.getClass())
-		return
-		data = parseCsv(remote_ruleset_content, separator: '\t')
-
-		data.each { line ->
-			def rule_map = [:]
-			headers.eachWithIndex { field, i ->
-				rule_map[field] = ( line[i] ? line[i] : "" )
-				// ruleset.add(rule)
-			}
-			rule_map["file"] = remote_ruleset_name
-			ruleset << rule_map
-		}
-	}
-	return
-	return ruleset
-}
-
 
 def build_ruleset(ruleset_list) {
 	def ruleset = []
@@ -338,6 +321,10 @@ def gui(projectRoot){
 	// create_ta_notes_tmx()
 }
 
+// commit/register translations to project_save.tmx? 
+// org.omegat.core.Core.getProject().saveProject(true)
+// reload to properly save and load translations // @Briac: not sure this works
+org.omegat.gui.main.ProjectUICommands.projectReload()
 
 // console.println("eventType: " + eventType)
 // console.println("Collecting garbage...")

@@ -141,9 +141,9 @@ tgt_lang_subtag = 	tgt_code.languageCode
 
 // Keep track of the directories and files we need before closing the project.
 def projectRoot = prop.projectRootDir;
-def projectSave = new File(prop.projectInternal, OConsts.STATUS_EXTENSION)
-def timestamp = new Date().format("yyyyMMddHHmmss", TimeZone.getTimeZone('UTC'));
-def backupFile = new File(prop.projectInternal, OConsts.STATUS_EXTENSION + timestamp + ".ta.bak");
+def projectSave = 	new File(prop.projectInternal, OConsts.STATUS_EXTENSION)
+def timestamp = 	new Date().format("yyyyMMddHHmmss", TimeZone.getTimeZone('UTC'));
+def backupFile = 	new File(prop.projectInternal, OConsts.STATUS_EXTENSION + timestamp + ".ta.bak");
 
 def tmx2source_dir = new File(prop.getTMRoot(), "tmx2source")
 tmx2source_dir.mkdir()
@@ -155,7 +155,7 @@ if (!prop) {
 	return
 }
 
-// @Briac: this prompt is often bypassed
+// @Briac: this prompt is often escaped (e.g. it is flashed: it appears for 1 second and dismissed automatically)
 int choice = JOptionPane.showOptionDialog(null, "The current project will be closed. Continue?",
 	title,
 	JOptionPane.YES_NO_OPTION,
