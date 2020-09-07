@@ -7,7 +7,9 @@
 
 // user options
 delete_working_tm = true  // change to 'false' to disable that option
+ta_note_prefix_re = ~/^#\d+# </ // edit the part between slashes
 add_to_note_in_xlf = false // NOT IMPLEMENTED YET (PLEASE ASK FOR IT IF YOU NEED IT)
+
 
 /* 
  * BACKGROUND:	Translation and adaptation (T/A) notes can be displayed in different ways in OmegaT.
@@ -203,9 +205,11 @@ try {
 		// mark entry to remove
 		if (delete_working_tm) tusToRemove.add(tu);
 	
+        def prefix_re = ~"${ta_note_prefix_re}"
 		// add entry to the TA notes 
 		def target_text = tu.tuv[1].seg.text()
-		def ta_note = target_text =~ /^COMMENT#*: /
+        // def ta_note = target_text =~ /^#\d+# </
+        def ta_note = target_text =~ prefix_re
 		if (ta_note) {
 			nodes_with_ta_notes.add(tu);
 		}
