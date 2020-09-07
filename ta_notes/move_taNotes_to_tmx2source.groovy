@@ -11,27 +11,27 @@ ta_note_prefix_re = ~/^#\d+# </ // edit the part between slashes
 add_to_note_in_xlf = false // NOT IMPLEMENTED YET (PLEASE ASK FOR IT IF YOU NEED IT)
 
 
-/* 
+/*
  * BACKGROUND:	Translation and adaptation (T/A) notes can be displayed in different ways in OmegaT.
  *  			They can be displayed in the Comments pane, or right below the source text of every segment.
  *  			The Comments pane has the advantage that it will flash in orange when the user opens a segment
- *  			that has a T/A note, but it has the disadvantage that can only be added if the source file is 
+ *  			that has a T/A note, but it has the disadvantage that can only be added if the source file is
  *  			XLIFF (or another format that allows notes, like PO). To show T/A notes under the
- *  			source text, they need to be added as a "second source" as a TM in /tm/tmx2source. 
- *  			
- * DISCLAIMER:	The former option (xliff) has NOT BEEN IMPLEMENTED YET and will not be unless 
+ *  			source text, they need to be added as a "second source" as a TM in /tm/tmx2source.
+ *
+ * DISCLAIMER:	The option `add_to_note_in_xlf` has NOT BEEN IMPLEMENTED YET and will not be unless 
  * 			somebody needs it and requests it.
- *  			
- * USE CASE: 	Your project has some TA notes in the translation of some segments, and you'd like to: 
- *	  		1) put them in a TM in `/tm/tmx2source` so that they appear under the source text, and 
+ *
+ * USE CASE: 	Your project has some TA notes in the translation of some segments, and you'd like to:
+ *	  		1) put them in a TM in `/tm/tmx2source` so that they appear under the source text, and
  *	  		2) (optonally) remove them from the working TM (`project_save.tmx`).
- *  
+ *
  * OPTIONS: 	The parametter `delete_working_tm` above determines whether the T/A notes are cleared
  * 			from the translation of the project. It is enabled by default but can be disabled
  * 			by the user: for that, simply replace "true" with "false".
- * 			
+ *
  * QUESTIONS:	manuel.souto@capstan.be
- * 
+ *
  */
 
 
@@ -45,9 +45,9 @@ add_to_note_in_xlf = false // NOT IMPLEMENTED YET (PLEASE ASK FOR IT IF YOU NEED
  * @changes
  * 	1.2.0 	added notes do tmx2source
  * 	1.3.0	added option to delete working TM or not
- * 	1.3.1	added reload to make sure all translations are used	
- * 	
- * @issues:	
+ * 	1.3.1	added reload to make sure all translations are used
+ *
+ * @issues:
  * 	* Sometimes it fails with "Closing project...canceled" and does not close the project, and stops there.
  * 	* Sometimes the prompts to the user to press OK and move forward disappear before you actually press OK
 */
@@ -177,11 +177,11 @@ Files.copy(projectSave.toPath(), backupFile.toPath(), java.nio.file.StandardCopy
 // move to tmx2source
 // Files.copy(projectSave.toPath(), ta_notes_tmx.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
 
-def write_tmx_file(xml_content, xml_file) {	
+def write_tmx_file(xml_content, xml_file) {
 	// https://stackoverflow.com/a/22221811 to avoid encoding issues
 	// The resulting XML file has no DOCTYPE, but it doesn't prevent it
 	// to being loaded correctly.
-	
+
 	xml_file.withWriter("UTF-8") { w ->
 		new XmlNodePrinter( new PrintWriter( w ) ).with { p ->
 			preserveWhitespace = true;
@@ -201,12 +201,12 @@ try {
 	def tusToRemove = [];
 	def nodes_with_ta_notes = [];
 	projectTmx.body.tu.findAll { tu ->
-	
+
 		// mark entry to remove
 		if (delete_working_tm) tusToRemove.add(tu);
-	
+
         def prefix_re = ~"${ta_note_prefix_re}"
-		// add entry to the TA notes 
+		// add entry to the TA notes
 		def target_text = tu.tuv[1].seg.text()
         // def ta_note = target_text =~ /^#\d+# </
         def ta_note = target_text =~ prefix_re
@@ -223,7 +223,7 @@ try {
 	}
 
 	// add the TA notes found to the TA notes list (to be written to the TA notes TM)
-	if ( ta_notes_tmx.exists() )  ta_notes_tmx.delete() 
+	if ( ta_notes_tmx.exists() )  ta_notes_tmx.delete()
 	def newBody = new Node(projectTmx, 'body', nodes_with_ta_notes)
 
 	// (re)create TA notes TM
@@ -235,7 +235,7 @@ catch(IOException e) {
 
 // sleep(5000)
 // projectSave.delete()
-	
+
 // Phew, all is good. Reopen the project.
 console.print("Reopening project...\n")
 JOptionPane.showMessageDialog(null, "TA notes file created.\nThe project will be re-loaded now.", title, JOptionPane.INFORMATION_MESSAGE);
