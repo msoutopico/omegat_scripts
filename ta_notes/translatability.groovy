@@ -10,13 +10,13 @@
 include_suggestions = true
 // save_as_tmx2source = true
 
-/* 
- * OPTIONS: 	The parametter `include_suggestions` above determines whether suggestions are included also (as 
- * 			well as comments). It is enabled by default but can be disabled by the user: 
+/*
+ * OPTIONS: 	The parametter `include_suggestions` above determines whether suggestions are included also (as
+ * 			well as comments). It is enabled by default but can be disabled by the user:
  * 			for that, simply replace "true" with "false".
- * 			
+ *
  * QUESTIONS:	manuel.souto@capstan.be
- * 
+ *
  */
 
 
@@ -277,7 +277,7 @@ def build_ruleset(ruleset_list) {
 }
 
 def create_ta_notes_tmx() {
-	
+
 	def tmx2source_dir = new File(prop.getTMRoot(), "tmx2source")
 	tmx2source_dir.mkdirs()
 	def project_save = new File(prop.projectInternal, OConsts.STATUS_EXTENSION)
@@ -303,15 +303,16 @@ def gui(projectRoot){
 		def source_text = segment.getSrcText();
 
 		ta_note = []
+		i = 1
 		ruleset.each { rule ->
 
-			// console.println(rule)
 			def pattern = ~"${rule.Source}"
 			assert pattern.class == Pattern
 			issue_found = source_text =~ pattern
 			assert issue_found instanceof java.util.regex.Matcher
 			if ( issue_found ) {
-				ta_note.add("COMMENT: " + rule.Comments) // + suggestion
+				ta_note.add("#${i}# <" + rule.Target + ">: " + rule.Comments + "// SUGGESTION: " + rule.Suggestion)
+				i++
 				// @ ask PM what format they want
 			}
 		}
@@ -321,7 +322,7 @@ def gui(projectRoot){
 	// create_ta_notes_tmx()
 }
 
-// commit/register translations to project_save.tmx? 
+// commit/register translations to project_save.tmx?
 // org.omegat.core.Core.getProject().saveProject(true)
 // reload to properly save and load translations // @Briac: not sure this works
 org.omegat.gui.main.ProjectUICommands.projectReload()
