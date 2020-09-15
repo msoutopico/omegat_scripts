@@ -1,13 +1,15 @@
 /* :name = TA - Translatability Assessment :description =Runs VF4TA on the project and adds TA notes in the translation field.
  *
- *  @version: 1.2.0
+ *  @version: 1.3.0
  *  @author: Manuel Souto Pico
- *  @date: 2020.08.30
+ *  @date: 2020.09.15
  *  @properties: https://cat.capstan.be/OmegaT/project-assets.json
  */
 
 // user options
 include_suggestions = true
+include_generic_rules = true
+include_all_rules = true // other containers too
 // save_as_tmx2source = true
 
 /*
@@ -61,7 +63,9 @@ include_suggestions = true
 
 
 /*
- * @changes: 1.2.0: added notes do tmx2source
+ * @changes:
+ * 1.2.0: added notes do tmx2source
+ * 1.3.0: added generic and other containers
 */
 
 // first check: is the project being opened?
@@ -205,6 +209,7 @@ def download_asset(url_to_remote_asset, assets_dir) {
 		}
 	} catch (IOException e) {
 		// unable to download asset
+		console.println(e.getStackTrace()[0].getLineNumber())
 		console.println("Unable to download asset: " + e.message)
 		return
 	}
@@ -217,6 +222,7 @@ def get_file_content(url_to_file) {
 		file_content = url.inputStream.readLines()
 	}  catch (IOException e) {
 		// last_modif will stay an empty array
+		console.println(e.getStackTrace()[0].getLineNumber())
 		console.println("Unable to download file list: " + e.message)
 		return // stop script if list of hashes not available?? or just download everything found?
 	}
@@ -224,21 +230,44 @@ def get_file_content(url_to_file) {
 }
 
 def filter_ruleset_list(list) {
+
+	if (!include_generic_rules && include_all_rules) {
+		console.println("""You have selected to use rules for all containers but not the generic rules.
+		However, the former setting overrides the latter, and generic rules will also be used.""")
+	}
+
+	def ruleset = []
+	def generic_ruleset = []
+    def container_ruleset = []
+    def all_rulesets = []
+
 	// quit if no rulesets list found
 	if (!list) {
-		console.println("No ruleset list found, unable to continue.")
+		console.println("List of rulesets not found, unable to continue.")
 		return
-	} else {
-		// filtered by container
-		return list.findAll { it.contains("RuleSet_Translatability_${container}") } //  || it.contains("RuleSet_Translatability_Generic")}
-		// get list of containers through API to check whether $container is in them, if it's not then use Generic
-		// only for English; if more source languages need to be used, then filter by source language
 	}
+
+	// not filtered by container: includes all rulesets
+	if (include_all_rules) {
+		all_rulesets = list.findAll { it.contains("RuleSet_Translatability_") }
+	} else if (include_generic_rules) {
+		// container + generic
+		generic_ruleset = list.findAll { it.contains("RuleSet_Translatability_Generic") }
+	}
+	// filtered by container only
+	container_ruleset = list.findAll { it.contains("RuleSet_Translatability_${container}") } //  ||
+
+	ruleset = (all_rulesets + generic_ruleset + container_ruleset).findAll{it}
+	// get list of containers through API to check whether $container is in them, if it's not then use Generic
+	// only for English; if more source languages need to be used, then filter by source language
+
+	return ruleset
 }
 
-
-
 def build_ruleset(ruleset_list) {
+
+	if (!ruleset_list) return
+
 	def ruleset = []
 	// def ruleset_without_filename = [:]
 	ruleset_list.each { remote_ruleset_name ->
@@ -285,39 +314,62 @@ def create_ta_notes_tmx() {
 
 }
 
-
 domain = "https://capps.capstan.be/"
 file_list = "file_list.txt"
 url_to_file_list = domain + "Rules/" + file_list
 
 ruleset_list = get_file_content(url_to_file_list)
+if (!ruleset_list) return
 ruleset_list = filter_ruleset_list(ruleset_list)
-ruleset = build_ruleset(ruleset_list)
 
-// make a copy of current working TM
+// console.println("build_ruleset: " + ruleset_list)
+if (!ruleset_list) return
+
+ruleset = build_ruleset(ruleset_list)
+if (!ruleset) return // doesn't seem to stop the script, shall I use System.exit(0) ?
 
 def gui(projectRoot){
 
+	// console.println("loop")
 	project.allEntries.each { segment ->
+
+		// print segment number
+		// console.println(segment.entryNum())
+
 		editor.gotoEntry(segment.entryNum())
-		def source_text = segment.getSrcText();
+		def source_text = segment.getSrcText()
 
 		ta_note = []
 		i = 1
-		ruleset.each { rule ->
+		if (ruleset) {
+			ruleset.each { rule ->
+				try {
+					def pattern = ~"${rule.Expression}"
+					// console.println("\nPattern: " + pattern)
+					// console.println("Source text: " + source_text)
 
-			def pattern = ~"${rule.Source}"
-			assert pattern.class == Pattern
-			issue_found = source_text =~ pattern
-			assert issue_found instanceof java.util.regex.Matcher
-			if ( issue_found ) {
-				ta_note.add("#${i}# <" + rule.Target + ">: " + rule.Comments + "// SUGGESTION: " + rule.Suggestion)
-				i++
-				// @ ask PM what format they want
+					assert pattern.class == Pattern
+					issue_found = source_text =~ pattern
+					assert issue_found instanceof java.util.regex.Matcher
+					def suggestion = ( rule.Suggestion ? "// SUGGESTION: " + rule.Suggestion : "" )
+					if ( issue_found ) {
+						// console.println("Issue found")
+						// if include_suggestions is true...
+						line = "#${i}# <" + rule.Category + ">: " + rule.Comment + suggestion
+						ta_note.add(line)
+						// console.println(line)
+						i = i+1
+						// @ ask PM what format they want
+					}
+				}  catch (IOException e) {
+					//  e.getCause().getStackTrace()
+					console.println(e.getStackTrace()[0].getLineNumber())
+					console.println("Unable to run check: " + e.message)
+					return
+				}
 			}
+			editor.replaceEditText(ta_note.join('\n' + '-'*60 + '\n'))
 		}
-		editor.replaceEditText(ta_note.join('\n' + '-'*60 + '\n'))
-		// add entry to tmx2source ?
 	}
 	// create_ta_notes_tmx()
 }
@@ -326,6 +378,7 @@ def gui(projectRoot){
 // org.omegat.core.Core.getProject().saveProject(true)
 // reload to properly save and load translations // @Briac: not sure this works
 org.omegat.gui.main.ProjectUICommands.projectReload()
+
 
 // console.println("eventType: " + eventType)
 // console.println("Collecting garbage...")
