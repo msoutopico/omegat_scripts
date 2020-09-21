@@ -10,7 +10,7 @@ OmegaT can be customized by means of:
 * scripts (and their properties files)
 * other configuration files
 
-All these custom files will be saved in the **user configuration folder**. Plugins and scripts are saved in their respective subfolders, `plugins` and `scripts`, and the rest of the configuration files are written directly to the user configuration folder.
+All these custom files can be saved in the **user configuration folder**. Plugins and scripts are saved in their respective subfolders, `plugins` and `scripts`, and the rest of the configuration files can be written directly to the user configuration folder.
 
 <!-- ### Options
 
@@ -20,6 +20,12 @@ All these custom files will be saved in the **user configuration folder**. Plugi
 | `autoLaunch` | If set to `true` and the script is saved at `scrips\application_startup`, the script will run when OmegaT is started. |
 | `removeExtraPlugins` | Lets you delete any loose jar files in the `plugins` folder under the **installation folder**. |
 | `deletePlugVerbose` | If set to true, makes the script list the jar files to be removed manually. If set to false, it makes the script remind the user to remove plugins from the `plugins` folder under the **installation folder**. | -->
+
+### Purpose
+
+The purpose of this script is for project managers and localization team leads to harmonize the working environment of their team members and to provide the best configuration for OmegaT's UI and customizable functionality as required by the specificities of the team's work.
+
+To obtain the optimal configuration and interface  without having to tweak each option manually one by one, the user just needs to run this script with the URL provided by the team lead or PM.
 
 ### Remote requirements
 
@@ -71,15 +77,13 @@ Every time the custom files are updated in the remote location, the line with th
 
 #### Plugins
 
-The script will also try to delete plugins used in the customization from the `plugins` folder in the **installation folder** (or prompt the user to delete them manually) to avoid conflicts with the plugins written in the user configuration folder.
-
-To avoid conflicts, the script also tries to delete all jar files from the **installation folder** (if that folder is writeable) or prompts the user do so manually (if the folder is read-only).
+To avoid conflicts with the plugins written in the user configuration folder, the script will also try to delete all jar files used in the customization from the `plugins` folder in the **installation folder** (or prompt the user to delete them manually if that folder is not writeable).
 
 Any jar files that the user might wish to keep can be saved under a subfolder in the `plugins` folder, e.g. `plugins\my_folder`. That way they will be protected and the customization script will not touch them.
 
 #### Restart
 
-To make sure that the new settings are applied (in case there is more than instance running), OmegaT will close after the customization update. It needs to be restarted manually. Since the check for updates happens when OmegaT is launched and before any project is open, if there is any update available, it'll have to be started twice.
+Some custom files (e.g. plugins) will only be available to the user after OmegaT is restarted.
 
 ### Locations
 #### Where is the user configuration folder
