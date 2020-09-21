@@ -1,8 +1,13 @@
 /* :name = Customization :description =Download langauge assets for a specific container and language pair
  *
- *  @version: 0.0.2
+ *  @version: 0.1.0
  *  @author: Manuel Souto Pico
  */
+
+ /* Changes:
+  *
+  *  0.1.0: added hash comparison for all config files
+  */
 
 
 
@@ -125,6 +130,126 @@ def download_asset(urlstr_to_remote_asset, dest_dir) {
 	}
 }
 
+
+
+
+
+
+
+def get_local_hash_list(dest, remote_file_list) {
+
+	// assert dest == config_dir
+
+	def local_config_dir = new File(dest) // either glossary_dir or tm_dir
+	def local_file_hash_map = [:]
+
+	local_config_dir.traverse(type: FILES, maxDepth: 2) { it ->
+		// @todo: should this be done asynchronously perhaps?
+
+		// create object of Path
+		Path abs_path = Paths.get(it.path)
+
+		def win_rel_path = local_config_dir.toPath().relativize( it.toPath() ).toFile()
+		def unix_rel_path = FilenameUtils.separatorsToUnix(win_rel_path.toString())
+
+		// String asset_name = abs_path.getFileName()
+		// call getFileName() and get FileName as a string
+
+		if (remote_file_list.contains(unix_rel_path)) {
+			// https://128bit.io/2011/02/17/md5-hashing-in-python-ruby-and-groovy/
+			def asset_hash = new BigInteger(1,digest.digest(it.getBytes())).toString(16).padLeft(32,"0")
+			local_file_hash_map.put(unix_rel_path, asset_hash)
+		}
+	}
+	// String newString = str.replace("\\","/");
+	return local_file_hash_map
+}
+
+def fetch_hash_list(url_to_hash_list) {
+
+	try {
+		// def local_path = new File(config_dir.toString() + File.separator + "asset_hashlist.txt")
+		def url = new URL(url_to_hash_list).openConnection()
+		return url.inputStream.readLines()
+	}  catch (IOException e) {
+		// last_modif will stay an empty array
+		console.println("Unable to download hash list: " + e.message)
+		return // stop script if list of hashes not available?? or just download everything found?
+	}
+}
+
+def update_assets(domain, dest) {
+
+	def local_config_dir = new File(dest)
+	def remote_config_dir = domain + "config/"
+
+	url_to_hash_list = domain + hash_filename
+	hash_list = fetch_hash_list(url_to_hash_list)
+
+	if (!hash_list) {
+		console.println("No hash list found, unable to continue.")
+		return
+	}
+	hash_list.each { it ->
+		// console.println("line in hash list: " + it)
+	}
+
+	// put remote list of hashes in array (filename -> hash)
+	//
+	// Pattern re = ~/${container}_(?:.*?)_Glossary_${tgt_code}/
+	// def match = re.matcher(str).asBoolean()
+
+	// moveing the list to a map
+	def remote_file_hash_map = hash_list.collectEntries {
+		def hash = it.split(':')[0]
+		def file = it.split(':')[1]
+		[(file): hash]
+	}
+	remote_file_hash_map.each {
+		// console.println("line in hash map: " + it.key + ":" + it.value)
+	}
+	// get local assets and their hashes
+	local_file_hash_map = get_local_hash_list(dest, remote_file_hash_map.keySet())
+
+
+	local_file_hash_map.each {
+		// console.println("line in local hash map: " + it.key + ":" + it.value)
+	}
+
+	// compare remote to local and get updated assets
+	remote_file_hash_map.each {
+		remote_asset_name = it.key
+		remote_asset_hash = it.value
+
+
+		def message
+		// if the remote asset is found in the assets folder
+		def downloaded = local_file_hash_map.containsKey(remote_asset_name)
+		if (downloaded) {
+			def local_asset_hash = local_file_hash_map.find{ it.key == remote_asset_name }?.value
+			if (local_asset_hash) {
+				if (local_asset_hash == remote_asset_hash) {
+					// message = "Remote asset ${remote_asset_name} hasn't changed, the local copy is up to date."
+					message = "..."
+				} else {
+					message = "Remote asset ${remote_asset_name} has been updated, a new download is needed."
+					// download
+					download_asset(remote_config_dir + remote_asset_name, local_config_dir)
+				}
+			}
+		} else {
+			// download
+			// check if it exists locally, if it does, then msg:
+			message = "Remote asset ${remote_asset_name} is new or had not been downloaded, will be downloaded now."
+			// download
+			download_asset(remote_config_dir + remote_asset_name, local_config_dir)
+		}
+
+		console.println(message)
+	}
+	console.println("Done!\n")
+}
+
 def delete_other_versions(urlstr_to_remote_asset, dest_dir) {
 
 	/*
@@ -183,12 +308,15 @@ files = [ "omegat-bidimarkers-0.2.0-all.jar", "plugin-omt-package-1.6.3.jar", "o
 
 //
 dest_dir = config_dir + "plugins"
-domain = "https://cat.capstan.be/OmegaT/installer/"
+domain = "https://cat.capstan.be/OmegaT/custom/"
+// def list_url = 			tb_domain + "list_contents.php"
+hash_filename = "hash_list.txt"
+update_assets(domain, config_dir)
 
 files.each { file ->
 	url_str = domain + "plugins/" + file
-	delete_other_versions(url_str, dest_dir)
-	download_asset(url_str, dest_dir)
+	// delete_other_versions(url_str, dest_dir)
+	// download_asset(url_str, dest_dir)
 }
 
 
