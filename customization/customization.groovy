@@ -1,12 +1,13 @@
 /* :name = Customization :description =Download langauge assets for a specific container and language pair
  *
- *  @version: 0.1.0
+ *  @version: 0.2.0
  *  @author: Manuel Souto Pico
  */
 
  /* Changes:
   *
   *  0.1.0: added hash comparison for all config files
+  *  0.2.0: remote and local plugins are compared based on filename
   */
 
 
@@ -158,6 +159,7 @@ def get_local_hash_list(dest, remote_file_list) {
 		if (remote_file_list.contains(unix_rel_path)) {
 			// https://128bit.io/2011/02/17/md5-hashing-in-python-ruby-and-groovy/
 			def asset_hash = new BigInteger(1,digest.digest(it.getBytes())).toString(16).padLeft(32,"0")
+			console.println(asset_hash + " <= " + unix_rel_path)
 			local_file_hash_map.put(unix_rel_path, asset_hash)
 		}
 	}
@@ -190,8 +192,22 @@ def update_assets(domain, dest) {
 		console.println("No hash list found, unable to continue.")
 		return
 	}
+
 	hash_list.each { it ->
-		// console.println("line in hash list: " + it)
+		console.println("line in hash list: " + it)
+	}
+
+
+
+
+
+	// remove plugins
+	// hash_list = hash_list.findAll { !it.contains(":plugins/") }
+
+
+
+	hash_list.each { it ->
+		console.println("line in hash list without plugins: " + it)
 	}
 
 	// put remote list of hashes in array (filename -> hash)
@@ -208,6 +224,8 @@ def update_assets(domain, dest) {
 	remote_file_hash_map.each {
 		// console.println("line in hash map: " + it.key + ":" + it.value)
 	}
+
+
 	// get local assets and their hashes
 	local_file_hash_map = get_local_hash_list(dest, remote_file_hash_map.keySet())
 
@@ -215,6 +233,21 @@ def update_assets(domain, dest) {
 	local_file_hash_map.each {
 		// console.println("line in local hash map: " + it.key + ":" + it.value)
 	}
+
+	remote_plugins = (remote_file_hash_map.findAll { it.key.startsWith("plugins/") }).keySet()
+	remote_file_hash_map = remote_file_hash_map.findAll { !it.key.startsWith("plugins/") }
+
+
+	def local_plugins_dir = new File(local_config_dir.toString() + File.separator + "plugins")
+	remote_plugins.each {
+		console.println(it)
+		def downloaded = local_file_hash_map.containsKey(it)
+		if (!downloaded) {
+			console.println(remote_config_dir + it + " will be written to " + local_plugins_dir)
+			download_asset(remote_config_dir + it, local_plugins_dir)
+		}
+	}
+
 
 	// compare remote to local and get updated assets
 	remote_file_hash_map.each {
