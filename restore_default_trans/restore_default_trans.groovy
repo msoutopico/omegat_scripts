@@ -1,8 +1,8 @@
 /* :name = Restore ID-based Default Translations :description=Removes unnecessary alternative translations for unique and for most frequent repetitions by removing context (ID/filename) properties. This script can be helpful in the scenario where a project only contains ID-based alternative translations, so that auto-propagation is blocked (which makes consistent editing challenging).
  *
  * @author      Manuel Souto Pico, Briac Pilpré
- * @date        2020-08-17
- * @version     0.0.3
+ * @date        2020-10-20
+ * @version     0.0.5
   */
 
 // import org.omegat.core.events.IProjectEventListener.PROJECT_CHANGE_TYPE;
@@ -14,6 +14,30 @@ import javax.swing.JOptionPane;
 import org.omegat.util.OConsts;
 import org.omegat.gui.main.ProjectUICommands;
 import java.nio.file.Files;
+
+def keep_only_srcs_with_alttgt(all_sources_set, segm_pairs, project_tmx) {
+
+	sources_to_process = []
+
+	all_sources_set.each { it ->
+
+		uniq_or_first = project_tmx.body.tu.find { node ->
+			(node.tuv[0].seg.text() == it) &&
+			(node.prop.count{ p -> p.@type == 'id' } == 0)
+		}
+
+		if (uniq_or_first && segm_pairs[it].size() > 1) {
+			// console.println("remove '${it}' from all_sources_set")
+			// def f = it.parent().remove(it)
+			// tusToRemove.add(uniq_or_first)
+
+		} else {
+			sources_to_process.add(it)
+		}
+	}
+	return sources_to_process
+}
+
 
 def gui() {
 	final def title = 'Restore ID-based Default Translations'
@@ -69,7 +93,6 @@ def gui() {
 
 		// add source text to list of all source texts
 		all_sources.add(source_text)
-
 		// create one to many mapping if it doesn't exist
 		if (!segm_pairs[source_text]) ( segm_pairs[source_text] = [] )
 		// add translation to the list that has the source text as key
@@ -79,13 +102,37 @@ def gui() {
 	// remove repetitions
 	def all_sources_set = all_sources.toSet()
 
+/*	sources_to_process = []
+
+	all_sources_set.each { it ->
+
+		uniq_or_first = project_tmx.body.tu.find { node ->
+			(node.tuv[0].seg.text() == it) &&
+			(node.prop.count{ p -> p.@type == 'id' } == 0)
+		}
+
+		if (uniq_or_first && segm_pairs[it].size() > 1) {
+			console.println("remove '${it}' from all_sources_set")
+			// def f = it.parent().remove(it)	// tusToRemove.add(targetTuv.parent());
+			// tusToRemove.add(uniq_or_first)
+
+		} else {
+			sources_to_process.add(it)
+		}
+
+	}*/
+
+	sources_to_process = keep_only_srcs_with_alttgt(all_sources_set, segm_pairs, project_tmx)
+
+
 	// finds the entries that should not be alternative
-	all_sources_set.each { src_txt ->
+	sources_to_process.each { src_txt ->
 
 		def alt_trans_set = segm_pairs[src_txt].toSet()
 		def max_rep = 0
 		// get the most frequent translation (to be made the default)
 		alt_trans_set.each { it ->
+			// console.println(it)
 			def freq_tgt = Collections.frequency(segm_pairs[src_txt], it)
 			//console.println("Translation '${it}' has been used ${freq_tgt} times")
 			if (freq_tgt > max_rep) {
@@ -93,6 +140,10 @@ def gui() {
 				segm_pairs_to_default[src_txt] = it
 			}
 		}
+
+/*		segm_pairs_to_default.each {
+			console.println(it)
+		}*/
 	}
 
 	def nodes_to_default_counter = 0
