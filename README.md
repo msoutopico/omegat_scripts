@@ -1,9 +1,14 @@
 # OmegaT scripts
 
-This repository contains Groovy scripts that can be run in OmegaT to automate or improve certain tasks.
+This repository contains scripts that users can run in OmegaT to automate or optimize certain tasks.
 
-* [Container assets management](https://github.com/msoutopico/omegat_scripts/tree/master/container_assets)
-* [Copy source](#copy-source-copy_sourcegroovy)
-* [Flush working TM](#flush-working-tm)
-* [Customization script](https://github.com/kosivantsov/omegat_scripts/tree/master/aux_scripts)
-* [Transliteration]
+* [Assets management](#container_assets)
+* [Copy source](#copy_source)
+* [Customization](#customization)
+* [Flush TM entries](#flush_entries)
+* [Match similarity (experimental)](#get_match_similarity)
+* [PISA conversion](#pisa_conv)
+* [Pseudo-translation](#pseudoxlate)
+* [Remove match ID-binding](#restore_default_trans)
+* [TA and T&A notes](#ta_notes)
+* [Transliteration](#xliter8)
