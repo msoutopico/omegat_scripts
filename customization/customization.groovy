@@ -1,20 +1,20 @@
 /* :name = Customization :description =Download langauge assets for a specific container and language pair
  *
- *  @version: 0.3.0
+ *  @version: 0.4.0
  *  @author: Manuel Souto Pico
  */
 
 
 
 
+
 // user-defined parameter
-domain = "https://cat.capstan.be/OmegaT/custom/"
-
-
-
-
-
-
+domain = ""
+hash_filename = "hash_list.txt"
+if (!domain) {
+	console.println("No URL for the remote location defined.")
+	return
+}
 
 
  /* Changes:
@@ -23,14 +23,14 @@ domain = "https://cat.capstan.be/OmegaT/custom/"
   *  0.2.0: remote and local plugins are compared based on filename
   *  0.3.0: remote and local scripts and config files based on hash
   *  0.4.0: domain entered by user or read from properties
+  *  0.5.0: copy scripts from install_dir/scripts
+  *  0.6.0: edit
+  *  0.6.0: delete plugins from install_dir/scripts
+  *  0.6.0: add prompt to user to delete old plugins manually (for Windows)
+  *  0.7.0: get %APPDATA% for execution by OmegaT.
+  *  0.8.0: prompt the user to restart OmegaT to use the latest files
+  *  0.9.0: checks the user ID and installs additional stuff if matches pattern (e.g. startswith("VER_"))
   */
-
-
-
-
-
-
-
 
 // first check: is the project being opened?
 // import org.omegat.core.events.IProjectEventListener.PROJECT_CHANGE_TYPE
@@ -163,7 +163,6 @@ def delete_old_plugins(new_jar_relpath, plugins_dir) {
 	def files_to_delete = new FileNameFinder().getFileNames(plugins_dir.toString(), jar_files /* includes */, new_jar_name /* excludes */)
 
 	files_to_delete.each { it -> // it is a path
-
 		def file = new File(it)
 		file.delete() // on Windows this might not work if OmegaT is running>
 		message.add("--- DELETE (at least try) $new_jar_name")
@@ -254,12 +253,17 @@ digest = MessageDigest.getInstance("MD5") // not using def gives the variable gl
 
 // if omegat internals are available
 config_dir = StaticUtils.getConfigDir()
+// otherwise:
+// if OmegaT is not running
+omegat_appdata = System.getenv("APPDATA") + File.separator + "OmegaT"
+appdata = ( System.properties['os.name'].toLowerCase().contains('windows') ?  omegat_appdata : "~/.omegat" )
+// e.g. C:\Users\souto\AppData\Roaming\OmegaT
+
 plugins_dir = new File(config_dir.toString() + File.separator + "plugins")
 scripts_dir = new File(config_dir.toString() + File.separator + "scripts")
 // dest_dir = config_dir + "plugins"
 // def list_url = 			tb_domain + "list_contents.php"
 remote_config_dir = domain + "config/"
-hash_filename = "hash_list.txt"
 // main function
 update_assets()
 
