@@ -2,8 +2,17 @@
  *
  * @author      Manuel Souto Pico
  * @date        2020.10.23
- * @version     0.0.2
+ * @version     0.0.3
   */
+
+
+/**
+ * @versioning
+ * 0.0.3	Added function `enforced_match_lurking` to avoid removing props from
+ * 			the alternative translation when there's an enforced match with a
+ * 			different translation.
+
+ */
 
 // import org.omegat.core.events.IProjectEventListener.PROJECT_CHANGE_TYPE;
 // if (eventType != PROJECT_CHANGE_TYPE.CLOSE) {
@@ -32,6 +41,35 @@ import groovy.xml.XmlUtil
 
 
 
+def get_all_tu_nodes_from_tm_dir(tmx_files_in_dir) {
+
+	def all_tu_nodes = []
+
+	tmx_files_in_dir.each { tmx_file ->
+		//@console.println(tmx_file)
+		def tmx_content = read_tmx_file(tmx_file)
+		def tu_nodes = tmx_content.body.tu.findAll { it }
+		all_tu_nodes += tu_nodes
+	}
+
+	return all_tu_nodes
+}
+
+
+def enforced_match_lurking(all_tu_nodes, entry_src_txt, entry_tgt_txt) {
+
+	def matches_found = all_tu_nodes.findAll { node ->
+		node.tuv[0].seg.find { s -> s.text() == entry_src_txt }
+	}
+
+	def match_found_with_equal_xlat = matches_found.findAll { node ->
+
+		node.tuv[0].seg.find { s -> s.text() == entry_src_txt } &&
+		node.tuv[1].seg.find { s -> s.text() == entry_tgt_txt }
+	}
+
+	return ( matches_found.isEmpty() || match_found_with_equal_xlat ? false : true )
+}
 
 
 def cluster_segm_pairs_by_alt_vs_default(entries) {
@@ -41,20 +79,37 @@ def cluster_segm_pairs_by_alt_vs_default(entries) {
 	sources_with_default = []
 	segm_pairs_with_default = [:]
 
-	entries.each { 
+	entries.each {
+
 
 	    info = project.getTranslationInfo(it)
 
+		// editor.gotoEntry(tu.entryNum())
+		String source_text = it.getSrcText() // java.lang.String
+		// console.println(source_text + " has an default translation")
+		String target_text = info.translation ? info.translation : null;
+		// console.println(source_text)
+
+		// @MS_20201223: break all other
+		// if (source_text != "None of the classes") { return true }
+		// if (source_text != "Climate change and global warming") { return true }
+		// if (source_text != "Most students at my school are imaginative.") { return true }
+
+
+
+		// console.println("info.defaultTranslation")
+		// console.println(info.defaultTranslation)
+		//
+		// console.println("it.getDuplicate()")
+		// console.println(it.getDuplicate())
+
 	    // assert isDup.getClass() == class org.omegat.core.data.SourceTextEntry$DUPLICATE
-	    def isDup = it.getDuplicate() // it can be FIRST, NEXT or NONE 
-	    def isAlt = info.defaultTranslation ? "default" : "alternative"
+	    def isDup = it.getDuplicate() // it can be FIRST, NEXT or NONE
+	    def isAlt = info.defaultTranslation ? "default" : "alternative" // this is the translation the entry/segment has in the project, there might be multiple or orphan segments in the project_save.tmx that are not used here or nowhere else in the project
 	    // console.println("${it.entryNum()} Alt: $isAlt \nDup: $isDup")
 
-		// editor.gotoEntry(tu.entryNum())
-		String source_text = it.getSrcText() // java.lang.String		
-		// console.println(source_text + " has an default translation")
-		String target_text = info.translation ? info.translation : null;	
-		// console.println(source_text)
+
+		// @MS_20201223: grab unique entries and their translation (alt, or def), then check in project_save whether there's other translations and delete them
 
 		if ( isAlt.toString() == "alternative" ) {
 
@@ -63,29 +118,28 @@ def cluster_segm_pairs_by_alt_vs_default(entries) {
 			// add translation to the list that has the source text as key
 			// to avoid repetitions
 			// // if (!segm_pairs_with_alt[source_text].contains(target_text)) segm_pairs_with_alt[source_text].add(target_text)
-			// to get real frequency of each 
+			// to get real frequency of each
 			segm_pairs_with_alt[source_text].add(target_text)
-			
-		} else if ( isAlt.toString() == "default" ) {
+
+		}
+
+		if ( isAlt.toString() == "default" ) {
 
 			if (!segm_pairs_with_default[source_text]) ( segm_pairs_with_default[source_text] = target_text )
-		} 
+		}
 	}
 
 	return [segm_pairs_with_alt, segm_pairs_with_default]
 }
 
-
+// this is in fact checking whether there's another identical segment which has default translation
 def has_default_xlat(source_text) {
 	return sources_with_default.contains(source_text)
 }
 
-
-
-
 def get_files_in_dir(dir, ext_re) {
 
-	dir.traverse(maxDepth: 0) { // removed: `type: FILES,` 
+	dir.traverse(maxDepth: 0) { // removed: `type: FILES,`
 		// create object of Path
 		Path path = Paths.get(it.path)
 		// call getFileName() and get FileName as a string
@@ -121,21 +175,21 @@ def get_list_of_repetitions(entries) {
 
 	def repetitions = []
 
-	entries.each { 
+	entries.each {
 
 	    info = project.getTranslationInfo(it)
 	    // assert isDup.getClass() == class org.omegat.core.data.SourceTextEntry$DUPLICATE
-	    def isDup = it.getDuplicate() // it can be FIRST, NEXT or NONE 
+	    def isDup = it.getDuplicate() // it can be FIRST, NEXT or NONE
 	    def isAlt = info.defaultTranslation ? "default" : "alternative"
 	    // console.println("${it.entryNum()} Alt: $isAlt \nDup: $isDup")
 
 		// editor.gotoEntry(tu.entryNum())
-		String source_text = it.getSrcText() // java.lang.String		
+		String source_text = it.getSrcText() // java.lang.String
 		// console.println(source_text)
 
 		if ( isDup.toString() == "FIRST" ) {
 			repetitions.add(source_text)
-		} 
+		}
 
 	}
 
@@ -160,30 +214,28 @@ def get_list_of_default_xlats_reg_in_projsave(projectSave) {
 		}
 	}
 	return default_xlats_in_proj
-
 }
-
 
 def get_list_of_default_translations(entries) {  // project.allEntries
 
 	def default_xlats_in_proj = [:]
 
-	entries.each { 
+	entries.each {
 
 	    info = project.getTranslationInfo(it)
 	    // assert isDup.getClass() == class org.omegat.core.data.SourceTextEntry$DUPLICATE
-	    def isDup = it.getDuplicate() // it can be FIRST, NEXT or NONE 
+	    def isDup = it.getDuplicate() // it can be FIRST, NEXT or NONE
 	    def isAlt = info.defaultTranslation ? "default" : "alternative"
 	    // console.println("${it.entryNum()} Alt: $isAlt \nDup: $isDup")
 
 		// editor.gotoEntry(tu.entryNum())
 		String source_text = it.getSrcText() // java.lang.String
-		String target_text = info.translation ? info.translation : null;	
+		String target_text = info.translation ? info.translation : null;
 		// console.println(source_text)
 
 		if ( isAlt.toString() == "default" ) {
 			default_xlats_in_proj[source_text] = target_text
-		} 
+		}
 
 	}
 
@@ -324,9 +376,9 @@ def remove_props_from_rep_src_with_same_tgt(tmx_content, first_and_uniq_in_tms) 
 
 			first_and_uniq_in_tms[it.tuv[0].seg.text()] == it.tuv[1].seg.text() &&
 			// the source text of the match to be debound is not found in project_save with a different default translation
-			( 
-				default_xlats_in_proj[it.tuv[0].seg.text()] 
-				&& 
+			(
+				default_xlats_in_proj[it.tuv[0].seg.text()]
+				&&
 				default_xlats_in_proj[it.tuv[0].seg.text()] == it.tuv[1].seg.text()
 			)
 
@@ -377,15 +429,21 @@ def gui() {
 	tmdir_fs = props.getTMRoot() // fs = forward slash
 
 	File tmx_dir = new File(tmdir_fs + path_to_tmx_dir)
-	def ext_re = ~/tmx/ 
+	def ext_re = ~/tmx$/
 
 	if (!tmx_dir.exists()) {
 		console.println("The folder /tm/${path_to_tmx_dir} does not exist")
 		return
 	}
 
-	files_in_dir = []
-	def tmx_files_in_dir = get_files_in_dir(tmx_dir, ext_re)	
+	files_in_dir = [] // must be init outside of the function, because the func is recursive
+	def tmx_files_in_dir = get_files_in_dir(tmx_dir, ext_re)
+
+	def all_tu_nodes = get_all_tu_nodes_from_tm_dir(tmx_files_in_dir)
+
+
+
+
 
 	// Keep track of the directories and files we need before closing the project.
 	projectRoot = props.projectRootDir;
@@ -399,22 +457,20 @@ def gui() {
 		JOptionPane.QUESTION_MESSAGE,
 		null, null, null);
 
-	if (choice == JOptionPane.YES_OPTION)
-	{
+	if (choice == JOptionPane.YES_OPTION) {
 		console.print("Closing project...\n")
 
 		// to make sure enforced translations are saved to project_save.tmx
-		/* 
+		/*
 		org.omegat.core.Core.getProject().saveProject(true);
 		ProjectUICommands.projectClose()
-		ProjectUICommands.projectOpen(projectRoot, true) 
+		ProjectUICommands.projectOpen(projectRoot, true)
 		*/
 		// ProjectUICommands.projectReload()
-		
+
 
 		// Closing project, to be safe.
 		ProjectUICommands.projectClose();
-
 	}
 
 
@@ -432,22 +488,25 @@ def gui() {
 
 	// Get all <tu> that have a translation
 
-
 	def all_sources = []
 	def segm_pairs = [:]
 	def segm_pairs_to_remove_props = [:]
 
-
 	def sorted_entries = cluster_segm_pairs_by_alt_vs_default(project.allEntries)
 
-	// sources_with_alt = sorted_entries[0] 
+	// sources_with_alt = sorted_entries[0]
 	segm_pairs_with_alt = sorted_entries[0] // map - string to list of strings
-	// sources_with_default = sorted_entries[2] 
+	// sources_with_default = sorted_entries[2]
 	segm_pairs_with_default = sorted_entries[1] // map - string to string
 
-	sources_with_alt = segm_pairs_with_alt.keySet() as String[]
-	sources_with_default = segm_pairs_with_default.keySet() as String[]
+	sources_with_alt = 		segm_pairs_with_alt.keySet() 		as String[]
+	sources_with_default = 	segm_pairs_with_default.keySet() 	as String[]
 
+	// @MS_20201223
+	// console.println("sources_with_alt:")
+	// console.println(Arrays.toString(sources_with_alt))
+	// console.println("sources_with_default:")
+	// console.println(Arrays.toString(sources_with_default))
 
 	segm_pairs_without_default = [:]
 	segm_pairs_to_remove_props = [:]
@@ -456,24 +515,26 @@ def gui() {
 	segm_pairs_with_alt.each { source_text, list_of_alt_xlats -> // key, value
 		// console.println(source_text)
 		if (has_default_xlat(source_text)) {
+			// console.println("++++ There's an identical segment in the project with a defaul xlat")
 
 			list_of_alt_xlats.each { alt_xlat ->
 
 				if (segm_pairs_with_default[source_text] == alt_xlat) {
-					// since the alt translation is identical to the default, it can be dumped
+					// since the alt translation is identical to the default, it can be dumped (=rm props)
 					if (!segm_pairs_to_remove_props[source_text]) segm_pairs_to_remove_props[source_text] = []
 					segm_pairs_to_remove_props[source_text].add(alt_xlat)
 				}
 			}
 
 		} else {
+			// console.println("---- NO identical segment in the project with a defaul xlat")
 			// collect to find the most frequent one and make it default
 			// segm_pairs_without_default.put(source_text, list_of_alt_xlats)
-			segm_pairs_without_default[source_text] = list_of_alt_xlats		
+			segm_pairs_without_default[source_text] = list_of_alt_xlats
 		}
 		// if (sources_with_default(source_text)) console.println("Remove context props of " + source_text)
 	}
-		
+
 
 	segms_pairs_with_alt_xlats_to_default = [:]
 	// finds the entries that should not be alternative
@@ -483,11 +544,18 @@ def gui() {
 		def max_rep = 0
 		// get the most frequent translation (to be made the default)
 		alt_trans_set.each { it ->
-			def freq_tgt = Collections.frequency(segm_pairs_without_default[src_txt], it)
-			//console.println("Translation '${it}' has been used ${freq_tgt} times")
-			if (freq_tgt > max_rep) {
-				max_rep = freq_tgt
-				segms_pairs_with_alt_xlats_to_default[src_txt] = it
+
+			// check whether there's an enforced match with the same translation
+			// if there is, the alt xlat can be removed / else it's bypassing the enforcement and should be kept
+			def enforced_will_overwrite = enforced_match_lurking(all_tu_nodes, src_txt, alt_trans = it)
+
+			if (!enforced_will_overwrite) {
+				def freq_tgt = Collections.frequency(segm_pairs_without_default[src_txt], it)
+				//console.println("Translation '${it}' has been used ${freq_tgt} times")
+				if (freq_tgt > max_rep) {
+					max_rep = freq_tgt
+					segms_pairs_with_alt_xlats_to_default[src_txt] = it
+				}
 			}
 		}
 	}
@@ -501,6 +569,9 @@ def gui() {
 	def props_to_remove_counter = 0
 	segms_pairs_with_alt_xlats_to_default.each { src, tgt ->
 
+		// @MS20201223:
+		// console.println(src + " => " + tgt)
+
 		// get all prop nodes that have tuv parents stored in segm_pairs_to_remove_props
 		def props_to_remove = project_tmx.body.tu.prop.findAll {
 			it.parent().tuv[0].seg.find { s -> s.text() == src } &&
@@ -512,6 +583,8 @@ def gui() {
 		props_to_remove.each { it ->
 			def parent = it.parent()
 			parent.remove(it)
+			// @MS_20201223:
+			// console.println("removing " + it)
 		}
 
 		/*
@@ -530,7 +603,7 @@ def gui() {
 		//@console.println("The following translations of '" + src + "' will be deleted")
 		//@list_of_alt_xlats.each { tgt -> console.println(tgt) }
 
-		list_of_alt_xlats.each { tgt -> 
+		list_of_alt_xlats.each { tgt ->
 
 			def tus_tu_remove = project_tmx.body.tu.findAll { tu ->
 				(tu.tuv[0].seg.text() == src) &&
@@ -541,7 +614,7 @@ def gui() {
 			nodes_to_default_counter += tus_tu_remove.size()
 			// Removes the found <tu> from the XML document
 			tus_tu_remove.each { tu ->
-				def f = tu.parent().remove(tu);
+				// def f = tu.parent().remove(tu);
 			}
 		}
 	}
@@ -590,14 +663,7 @@ def gui() {
 
 
 
-	def all_tu_nodes = []
 
-	tmx_files_in_dir.each { tmx_file ->
-		//@console.println(tmx_file)
-		def tmx_content = read_tmx_file(tmx_file)
-		def tu_nodes = tmx_content.body.tu.findAll { it }
-		all_tu_nodes += tu_nodes
-	}
 	def first_and_uniq_in_tms = get_first_and_uniq_in_tms(all_tu_nodes)
 	def default_xlats_in_tms = get_default_xlats_in_tms(all_tu_nodes)
 
