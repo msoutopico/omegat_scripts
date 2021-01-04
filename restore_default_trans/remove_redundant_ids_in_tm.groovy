@@ -1,18 +1,24 @@
 /* :name = Remove Redundant IDs in TMs :description=
  *
- * @author      Manuel Souto Pico
- * @date        2020.10.23
- * @version     0.0.3
+ * @author	Manuel Souto Pico
+ * @creation	2020.10.23
+ * @last		2020.01.04
+ * @version	0.0.4
   */
 
+// path to the folder inside the TM folder
+path_to_tmx_dir = "enforce/"
 
 /**
  * @versioning
- * 0.0.3	Added function `enforced_match_lurking` to avoid removing props from
- * 			the alternative translation when there's an enforced match with a
- * 			different translation.
+ * 0.0.3	2020-12-23: Added function `enforced_match_lurking` to avoid removing 
+ * 		props from the alternative translation when there's an enforced match 
+ * 		with a different translation.
+ * 0.0.4	2020-01-04: Added function `enforced_match_lurking` to avoid removing 
+ * 		props from the alternative translation when there's an enforced match 
+ * 		with a different translation.
+*/
 
- */
 
 // import org.omegat.core.events.IProjectEventListener.PROJECT_CHANGE_TYPE;
 // if (eventType != PROJECT_CHANGE_TYPE.CLOSE) {
@@ -21,10 +27,6 @@
 
 // PROBLEMS:
 // 1. when prompting to continue, saying No does not work
-
-
-// path to the folder inside the TM folder
-path_to_tmx_dir = "enforce/"
 
 
 // code starts here, do not modify
@@ -38,7 +40,30 @@ import groovy.util.*
 import java.io.File
 import groovy.xml.StreamingMarkupBuilder
 import groovy.xml.XmlUtil
+import org.omegat.util.StaticUtils
+import java.nio.file.Path
 
+import java.text.SimpleDateFormat
+def timestamp = new Date()
+def readableSdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+def filenameSdf = new SimpleDateFormat("yyyyMMdd_HHmmss")
+logDate = readableSdf.format(timestamp)
+
+// def confDir = StaticUtils.getConfigDir()
+def prop = project.projectProperties
+def projectRoot = prop.projectRootDir
+// console.println(projectRoot) // path with OS's file separator, without final /
+// console.println(prop.projectRoot) // path with /, with final /
+
+def logFileName = "scripts_log.txt"
+String scriptOutputPath = projectRoot.toString() + File.separator + 'script_output'
+def scriptOutputDir = new File(scriptOutputPath);
+scriptOutputDir.mkdirs(); // if file already exists will do nothing
+
+String logFilePath = scriptOutputPath + File.separator + logFileName
+console.println(logFilePath)
+logFile = new File(logFilePath);
+logFile.createNewFile(); // if file already exists will do nothing
 
 
 def get_all_tu_nodes_from_tm_dir(tmx_files_in_dir) {
@@ -678,8 +703,12 @@ def gui() {
 
 	}
 
+	// log 
+	logFile.text +="[${logDate}] Script 'Remove Redundant IDs in TMs' [remove_redundant_ids_in_tm.groovy] run on this project.\n"
+	def countMsg = "[${logDate}] Context properties removed from ${props_to_remove_counter} entries."
+	logFile.text += countMsg + "\n"
 	// Phew, all is good. Reopen the project.
-	JOptionPane.showMessageDialog(null, "Context removed from ${props_to_remove_counter} entries that correspond to unique segments.", title, JOptionPane.INFORMATION_MESSAGE);
+	JOptionPane.showMessageDialog(null, countMsg, title, JOptionPane.INFORMATION_MESSAGE);
 	ProjectUICommands.projectOpen(projectRoot, true);
 
 }
