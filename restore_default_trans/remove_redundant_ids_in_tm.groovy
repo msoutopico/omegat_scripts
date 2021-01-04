@@ -4,7 +4,7 @@
  * @creation	2020.10.23
  * @last		2020.01.04
  * @version	0.0.4
-  */
+*/
 
 // path to the folder inside the TM folder
 path_to_tmx_dir = "enforce/"
@@ -14,9 +14,8 @@ path_to_tmx_dir = "enforce/"
  * 0.0.3	2020-12-23: Added function `enforced_match_lurking` to avoid removing 
  * 		props from the alternative translation when there's an enforced match 
  * 		with a different translation.
- * 0.0.4	2020-01-04: Added function `enforced_match_lurking` to avoid removing 
- * 		props from the alternative translation when there's an enforced match 
- * 		with a different translation.
+ * 0.0.4	2020-01-04: Added log to `scripts_output` folder indicating how many
+ * 		ICE matches have been removed, who ran the script and when.
 */
 
 
@@ -42,6 +41,8 @@ import groovy.xml.StreamingMarkupBuilder
 import groovy.xml.XmlUtil
 import org.omegat.util.StaticUtils
 import java.nio.file.Path
+import org.omegat.util.Preferences
+
 
 import java.text.SimpleDateFormat
 def timestamp = new Date()
@@ -50,6 +51,7 @@ def filenameSdf = new SimpleDateFormat("yyyyMMdd_HHmmss")
 logDate = readableSdf.format(timestamp)
 
 // def confDir = StaticUtils.getConfigDir()
+userId = Preferences.getPreferenceDefault(Preferences.TEAM_AUTHOR, System.getProperty("user.name"))
 def prop = project.projectProperties
 def projectRoot = prop.projectRootDir
 // console.println(projectRoot) // path with OS's file separator, without final /
@@ -704,9 +706,9 @@ def gui() {
 	}
 
 	// log 
-	logFile.text +="[${logDate}] Script 'Remove Redundant IDs in TMs' [remove_redundant_ids_in_tm.groovy] run on this project.\n"
-	def countMsg = "[${logDate}] Context properties removed from ${props_to_remove_counter} entries."
-	logFile.text += countMsg + "\n"
+	logFile.text +="[${logDate}] Script 'Remove Redundant IDs in TMs' [remove_redundant_ids_in_tm.groovy] run by ${userId}.\n"
+	def countMsg = "Context properties removed from ${props_to_remove_counter} entries."
+	logFile.text += "[${logDate}] " + countMsg + "\n"
 	// Phew, all is good. Reopen the project.
 	JOptionPane.showMessageDialog(null, countMsg, title, JOptionPane.INFORMATION_MESSAGE);
 	ProjectUICommands.projectOpen(projectRoot, true);
