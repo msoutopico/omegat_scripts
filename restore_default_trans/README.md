@@ -67,6 +67,8 @@ all the alternative translations are removed and only the default translation is
 
 ## Non-cases
 
+### Only unnecessary alternative translations are affected
+
 Any alternative translations that are different from the default translation remain unaltered.
 
 For example, segment “(Please select one response.)” has some alternative translations with text “(Palun vali üks vastus.)”, which is identical to the default translation. Those alternative translations are not necessary, so they are deleted:
@@ -75,7 +77,12 @@ For example, segment “(Please select one response.)” has some alternative tr
 
 Only the alternative translations (e.g. “(Palun valige üks vastus.”) which are different from the default translation are kept:
 
-![Alt text](https://i.imgur.com/IjXUv95.png "x") 
+![Alt text](https://i.imgur.com/IjXUv95.png "x")
+
+### Only alternative translations that are not holding enforced translations are affected
 
 Also, whenever removing context properties from the alternative translation to make it the default translation, the script checks the enforced matches. If there is an enforced match for the same source text with a different translation but there isn't one with the same translation, then the context properties must be kept to avoid the segment being pre-translated with a different translation coming from the enforced TM.
- 
+
+## Logs
+
+Whenever the script is run, it'll write a log in the `script_output` folder of the project, which helps making out projects where the script has been run from projects where the script has now.
