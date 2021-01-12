@@ -20,7 +20,7 @@ and therefore becomes the default translation:
 ![Alt text](https://i.imgur.com/FRIdRo6.png "x")
 
 
-2: When a unique segment only has one alternative translation, it removes the context properties so that it becomes a default translation.
+2: When a unique segment only has one alternative translation, it removes the context properties so that it becomes a default translation (unless there's a different enforce translation for the same source text).
 
 So in cases like segment 16, the alternative translation
 ![Alt text](https://i.imgur.com/MzQGAoU.png "x")
