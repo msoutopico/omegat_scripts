@@ -1,5 +1,7 @@
 # Script: Remove Redundant ID-binding in TMs
 
+<!--- https://imgur.com/gallery/8tIFPMG -->
+
 ## Purpose 
 
 The purpose of these scripts is to carefully remove context metadata (e.g. ID-binding) in entries where it is not absolutely needed, so as not to hamper auto-propagation and proper flowing of the normal sorting of matches. For example, it is meant to solve the situation where many identical translations are in fact alternative translations, making it a pain to apply edits consistently (see the multiple translations pane in the screenshot below):
