@@ -1,4 +1,4 @@
-# Script: Remove Redundant ID-binding in TMs
+# Scripts to remove unnecessary context properties
 
 <!--- https://imgur.com/gallery/8tIFPMG -->
 
@@ -9,12 +9,17 @@ The purpose of these scripts is to carefully remove context metadata (e.g. ID-bi
 <!-- https://imgur.com/zbNMc2R -->
 ![Alt text](https://i.imgur.com/zbNMc2R.png "Multiple translations with identical text")
 
+Two scripts can be used: 
+
+* [`remove_redundant_ids_in_tm.groovy`] : removes unnecessary context props (ID) in both the enforced TMs and the working TM
+* [`restore_default_trans.groovy`]: removes unnecessary context props (ID) from the working TM
+
+## Script: Remove Redundant ID-binding in TMs
+
+### Cases
 
 
-## Cases
-
-
-### 1: Repeated segment with no default translation and several alternative translations
+#### 1: Repeated segment with no default translation and several alternative translations
 
 When a repeated segment has no default translation, it computes what is the most frequent of all the existing alternative translations and turns that into the default translation:
 
@@ -29,7 +34,7 @@ and therefore becomes the default translation:
 <!--- test what happens with a unique segment with several alternative transaltion --> 
 
 
-### 2: Unique segment with no default translation and one alternative translation only
+#### 2: Unique segment with no default translation and one alternative translation only
 
 When a unique segment only has one alternative translation, it removes the context properties so that it becomes a default translation.
 
@@ -44,9 +49,9 @@ becomes the default translation:
 <!--- test what happens with repeated segments with one alternative transaltion --> 
 
 
-### 3: Repeated segment with several identical translations (one default and some alternative)
+#### 3: Repeated segment with several identical translations (one default and some alternative)
 
-3: When a repeated segment has a default translation and one or more alternative translations that are identical to the default translation, it removes the identical alternative translations.
+When a repeated segment has a default translation and one or more alternative translations that are identical to the default translation, it removes the identical alternative translations.
 
 So for example repeated segment “Full time”, which has to one default translation and one alternative translation, which are identical:
 
@@ -65,9 +70,9 @@ all the alternative translations are removed and only the default translation is
 ![Alt text](https://i.imgur.com/9MuTtz4.png "x") 
 
 
-## Non-cases
+### Non-cases
 
-### Only unnecessary alternative translations are affected
+#### Only unnecessary alternative translations are affected
 
 Any alternative translations that are different from the default translation remain unaltered.
 
@@ -79,10 +84,10 @@ Only the alternative translations (e.g. “(Palun valige üks vastus.”) which 
 
 ![Alt text](https://i.imgur.com/IjXUv95.png "x")
 
-### Only alternative translations that are not holding enforced translations are affected
+#### Only alternative translations that are not holding enforced translations are affected
 
 Also, whenever removing context properties from the alternative translation to make it the default translation, the script checks the enforced matches. If there is an enforced match for the same source text with a different translation but there isn't one with the same translation, then the context properties must be kept to avoid the segment being pre-translated with a different translation coming from the enforced TM.
 
-## Logs
+### Logs
 
 Whenever the script is run, it'll write a log in the `script_output` folder of the project, which helps making out projects where the script has been run from projects where the script has now.
