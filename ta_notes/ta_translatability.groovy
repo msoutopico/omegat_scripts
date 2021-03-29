@@ -63,7 +63,7 @@ include_all_rules = true // other containers too
 
 
 /*
- * @changes: 
+ * @changes:
  * 1.2.0: added notes do tmx2source
  * 1.3.0: added generic and other containers
 */
@@ -230,10 +230,10 @@ def get_file_content(url_to_file) {
 }
 
 def filter_ruleset_list(list) {
-	
+
 	if (!include_generic_rules && include_all_rules) {
 		console.println("""You have selected to use rules for all containers but not the generic rules.
-		However, the former setting overrides the latter, and generic rules will also be used.""")	
+		However, the former setting overrides the latter, and generic rules will also be used.""")
 	}
 
 	def ruleset = []
@@ -254,9 +254,9 @@ def filter_ruleset_list(list) {
 		// container + generic
 		generic_ruleset = list.findAll { it.contains("RuleSet_Translatability_Generic") }
 	}
-	// filtered by container only 
-	container_ruleset = list.findAll { it.contains("RuleSet_Translatability_${container}") } //  || 
-		
+	// filtered by container only
+	container_ruleset = list.findAll { it.contains("RuleSet_Translatability_${container}") } //  ||
+
 	ruleset = (all_rulesets + generic_ruleset + container_ruleset).findAll{it}
 	// get list of containers through API to check whether $container is in them, if it's not then use Generic
 	// only for English; if more source languages need to be used, then filter by source language
@@ -267,7 +267,7 @@ def filter_ruleset_list(list) {
 def build_ruleset(ruleset_list) {
 
 	if (!ruleset_list) return
-	
+
 	def ruleset = []
 	// def ruleset_without_filename = [:]
 	ruleset_list.each { remote_ruleset_name ->
@@ -323,7 +323,7 @@ if (!ruleset_list) return
 ruleset_list = filter_ruleset_list(ruleset_list)
 
 // console.println("build_ruleset: " + ruleset_list)
-if (!ruleset_list) return 
+if (!ruleset_list) return
 
 ruleset = build_ruleset(ruleset_list)
 if (!ruleset) return // doesn't seem to stop the script, shall I use System.exit(0) ?
@@ -335,7 +335,7 @@ def gui(projectRoot){
 
 		// print segment number
 		// console.println(segment.entryNum())
-		
+
 		editor.gotoEntry(segment.entryNum())
 		def source_text = segment.getSrcText()
 
@@ -347,7 +347,7 @@ def gui(projectRoot){
 					def pattern = ~"${rule.Expression}"
 					// console.println("\nPattern: " + pattern)
 					// console.println("Source text: " + source_text)
-					
+
 					assert pattern.class == Pattern
 					issue_found = source_text =~ pattern
 					assert issue_found instanceof java.util.regex.Matcher
@@ -365,7 +365,7 @@ def gui(projectRoot){
 					//  e.getCause().getStackTrace()
 					console.println(e.getStackTrace()[0].getLineNumber())
 					console.println("Unable to run check: " + e.message)
-					return 
+					return
 				}
 			}
 			editor.replaceEditText(ta_note.join('\n' + '-'*60 + '\n'))

@@ -1,6 +1,6 @@
 /* :name =TA - Create T/A Notes TM :description =This script moves T/A notes from the translation of every segment to a TMX file located at /tm/tmx2source, so that TA notes will appear below each source text.
  *
- *  @version: 1.2.0
+ *  @version: 1.3.1
  *  @author: Manuel Souto Pico
  *  @date: 2020.08.30
  */
@@ -19,7 +19,7 @@ add_to_note_in_xlf = false // NOT IMPLEMENTED YET (PLEASE ASK FOR IT IF YOU NEED
  *  			XLIFF (or another format that allows notes, like PO). To show T/A notes under the
  *  			source text, they need to be added as a "second source" as a TM in /tm/tmx2source.
  *
- * DISCLAIMER:	The option `add_to_note_in_xlf` has NOT BEEN IMPLEMENTED YET and will not be unless 
+ * DISCLAIMER:	Option `add_to_note_in_xlf` has NOT BEEN IMPLEMENTED YET and will not be unless
  * 			somebody needs it and requests it.
  *
  * USE CASE: 	Your project has some TA notes in the translation of some segments, and you'd like to:
