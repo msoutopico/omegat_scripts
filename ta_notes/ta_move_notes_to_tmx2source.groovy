@@ -1,4 +1,4 @@
-/* :name =TA - Create T/A Notes TM :description =This script moves T/A notes from the translation of every segment to a TMX file located at /tm/tmx2source, so that TA notes will appear below each source text.
+/* :name =TA - Create T&A Notes TM :description =This script moves T&A notes from the translation of every segment to a TMX file located at /tm/tmx2source, so that TA notes will appear below each source text.
  *
  *  @version: 1.3.1
  *  @author: Manuel Souto Pico
@@ -12,11 +12,11 @@ add_to_note_in_xlf = false // NOT IMPLEMENTED YET (PLEASE ASK FOR IT IF YOU NEED
 
 
 /*
- * BACKGROUND:	Translation and adaptation (T/A) notes can be displayed in different ways in OmegaT.
+ * BACKGROUND:	Translation and adaptation (T&A) notes can be displayed in different ways in OmegaT.
  *  			They can be displayed in the Comments pane, or right below the source text of every segment.
  *  			The Comments pane has the advantage that it will flash in orange when the user opens a segment
- *  			that has a T/A note, but it has the disadvantage that can only be added if the source file is
- *  			XLIFF (or another format that allows notes, like PO). To show T/A notes under the
+ *  			that has a T&A note, but it has the disadvantage that can only be added if the source file is
+ *  			XLIFF (or another format that allows notes, like PO). To show T&A notes under the
  *  			source text, they need to be added as a "second source" as a TM in /tm/tmx2source.
  *
  * DISCLAIMER:	Option `add_to_note_in_xlf` has NOT BEEN IMPLEMENTED YET and will not be unless
@@ -26,7 +26,7 @@ add_to_note_in_xlf = false // NOT IMPLEMENTED YET (PLEASE ASK FOR IT IF YOU NEED
  *	  		1) put them in a TM in `/tm/tmx2source` so that they appear under the source text, and
  *	  		2) (optonally) remove them from the working TM (`project_save.tmx`).
  *
- * OPTIONS: 	The parametter `delete_working_tm` above determines whether the T/A notes are cleared
+ * OPTIONS: 	The parametter `delete_working_tm` above determines whether the T&A notes are cleared
  * 			from the translation of the project. It is enabled by default but can be disabled
  * 			by the user: for that, simply replace "true" with "false".
  *
