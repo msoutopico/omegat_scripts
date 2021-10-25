@@ -18,17 +18,17 @@ def gui(){
 		def target = currSegm.getSrcText();
 
 		// pseudo-translate upper case letters 
-		search = /\p{Lu}(?![^<]*?>|[^%\s]*?%|[^\{]*?\})/   
+		search = /\p{Lu}(?![^<]*?>|[^%\s]*?%|[^{]*?\})/   
 		replac = "X"
 		target = target.replaceAll(search, replac)
 
 		// pseudo-translate lower case letters 
-		search = /\p{Ll}(?![^<]*?>|[^%\s]*?%|[^\{]*?\})/   
+		search = /\p{Ll}(?![^<]*?>|[^%\s]*?%|[^{]*?\})/   
 		replac = "x"
 		target = target.replaceAll(search, replac)
 
 		// pseudo-translate ditis (in any case ;)
-		search = /\p{N}(?![^<]*?>|[^%\s]*?%|[^\{]*?\})/   
+		search = /\p{N}(?![^<]*?>|[^%\s]*?%|[^{]*?\})/   
 		replac = "#"
 		target = target.replaceAll(search, replac)
 				
@@ -53,7 +53,7 @@ def gui() {
 		replac = "#"
 		pseudo = pseudo.replaceAll(search, replac)	
 		// pseudo-translate upper cased letters
-		search = /[A-ZÀ�ÄÂÃÈÉËÊÌ��ÎÒÓÖÔÕÚÙÜÛ](?![^<]*?>)/
+		search = /[A-ZÀÁÄÂÃÈÉËÊÌÍÏÎÒÓÖÔÕÚÙÜÛ](?![^<]*?>)/
 		replac = "X"
 		pseudo = pseudo.replaceAll(search, replac)		
 		// pseudo-translate upper cased letters
@@ -68,5 +68,4 @@ def gui() {
 
 // Check
 // [a-wyzA-WYZ0-9]
-// [!-’,;.:“�\(\)\]\[\?&=xX#–"º%…—/   ^t^13  ]
-
+// [!-’,;.:“”\(\)\]\[\?&=xX#–"º%…—/   ^t^13  ]
