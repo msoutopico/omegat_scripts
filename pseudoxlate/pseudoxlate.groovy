@@ -2,7 +2,7 @@
  * 
  * @author      Manuel Souto Pico
  * @date        2020-09-12
- * @version     0.2.0
+ * @version     0.2.1
  */
 
 /* 
