@@ -1,14 +1,14 @@
 /* :name = Pseudo-translate project :description=
  * 
  * @author      Manuel Souto Pico
- * @date        2020-1025
+ * @date        2020-10-25
  * @version     0.2.1
  */
 
 /* 
  * @versions: 
- * 0.2.0: added %CODE% exclusion
- * 0.2.1: added regex to prevent replacement inside curly brackets, e.g. {PlaceHolder}, {THIS}, etc.
+ * 0.2.0: MS added %CODE% exclusion
+ * 0.2.1: AM added regex to prevent replacement inside curly brackets, e.g. {PlaceHolder}, {THIS}, etc.
  */
  
 def gui(){
